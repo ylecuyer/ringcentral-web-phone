@@ -492,7 +492,7 @@ var MediaStreamsImpl = /** @class */ (function () {
                             return [3 /*break*/, 5];
                         case 5: return [3 /*break*/, 7];
                         case 6:
-                            self.rcWPLoge(self.tag, 'The session cannot be empty');
+                            reject(new Error('The session cannot be empty'));
                             _a.label = 7;
                         case 7: return [2 /*return*/];
                     }
@@ -818,6 +818,7 @@ var WebPhone = /** @class */ (function () {
             },
             domain: this.sipInfo.domain,
             autostart: false,
+            autostop: typeof options.autoStop === 'undefined' ? true : options.autoStop,
             register: true,
             userAgentString: userAgentString,
             sessionDescriptionHandlerFactoryOptions: sessionDescriptionHandlerFactoryOptions,
@@ -832,7 +833,7 @@ var WebPhone = /** @class */ (function () {
         options.switchBackInterval = this.sipInfo.switchBackInterval;
         this.userAgent = userAgent_1.patchUserAgent(new sip_js_1.UA(configuration), this.sipInfo, options, id);
     }
-    WebPhone.version = '0.8.6';
+    WebPhone.version = '0.8.7';
     WebPhone.uuid = utils_1.uuid;
     WebPhone.delay = utils_1.delay;
     WebPhone.extend = utils_1.extend;
@@ -1732,14 +1733,9 @@ function warmTransfer(target, transferOptions) {
     if (transferOptions === void 0) { transferOptions = {}; }
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, (this.localHold ? Promise.resolve(null) : this.hold())];
-                case 1:
-                    _a.sent();
-                    transferOptions.extraHeaders = (transferOptions.extraHeaders || []).concat(this.ua.defaultHeaders);
-                    this.logger.log('Completing warm transfer');
-                    return [2 /*return*/, Promise.resolve(this.refer(target, transferOptions))];
-            }
+            transferOptions.extraHeaders = (transferOptions.extraHeaders || []).concat(this.ua.defaultHeaders);
+            this.logger.log('Completing warm transfer');
+            return [2 /*return*/, Promise.resolve(this.refer(target, transferOptions))];
         });
     });
 }
@@ -1903,7 +1899,7 @@ function addTrack(remoteAudioEle, localAudioEle) {
     }
     remoteAudio.srcObject = remoteStream;
     remoteAudio.play().catch(function () {
-        _this.logger.log('Remote play was rejected');
+        _this.logger.error('Remote play was rejected');
     });
     var localStream = new MediaStream();
     if (pc.getSenders) {
@@ -1921,7 +1917,7 @@ function addTrack(remoteAudioEle, localAudioEle) {
     }
     localAudio.srcObject = localStream;
     localAudio.play().catch(function () {
-        _this.logger.log('Local play was rejected');
+        _this.logger.error('Local play was rejected');
     });
     if (localStream && remoteStream && !this.mediaStatsStarted) {
         this.mediaStreams = new mediaStreams_1.MediaStreams(this);
@@ -1947,6 +1943,7 @@ function addTrack(remoteAudioEle, localAudioEle) {
         }, mediaCheckTimer);
     }
 }
+/*--------------------------------------------------------------------------------------------------------------------*/
 function stopMediaStats() {
     this.logger.log('Stopping media stats collection');
     if (!this) {
@@ -2437,7 +2434,7 @@ function __afterWSConnected() {
 /* 12 */
 /***/ (function(module) {
 
-module.exports = {"name":"ringcentral-web-phone","version":"0.8.6","scripts":{"test":"npm run test:ut && npm run test:e2e","test:coverage":"cat .coverage/lcov.info | coveralls -v","test:e2e":"jest --config jest.config.e2e.js --runInBand","test:ut":"jest --config jest.config.ut.js","build":"npm run build:tsc && npm run build:webpack","build:tsc":"tsc","build:webpack":"cross-env NODE_ENV=production webpack --config webpack.config.js --progress --color","start":"webpack-dev-server --config webpack.config.js --progress --color","server":"http-server --port ${PORT:-8080}","watch":"npm-run-all --print-label --parallel \"build:** -- --watch\"","lint":"eslint --cache --cache-location node_modules/.cache/eslint --fix","lint:all":"npm run lint \"src/**/*.ts\" \"demo/**/*.js\"","lint:staged":"lint-staged"},"dependencies":{"getstats":"1.2.0","sip.js":"0.13.5"},"devDependencies":{"@types/expect-puppeteer":"3.3.1","@types/jest":"24.0.15","@types/jest-environment-puppeteer":"4.0.0","@types/node":"12.0.8","bootstrap":"3.4.1","cache-loader":"4.0.0","copy-webpack-plugin":"5.0.3","coveralls":"3.0.4","cross-env":"5.2.0","dotenv":"8.0.0","eslint":"6.8.0","eslint-config-ringcentral-typescript":"3.0.0","html-webpack-plugin":"3.2.0","http-server":"0.11.1","husky":"2.4.1","istanbul-instrumenter-loader":"3.0.1","jest":"24.8.0","jest-puppeteer":"4.2.0","jquery":"3.4.1","lint-staged":"8.2.1","npm-run-all":"4.1.5","puppeteer":"1.18.0","ringcentral":"3.2.2","ts-jest":"24.0.2","ts-loader":"6.0.3","typescript":"3.9.2","uglifyjs-webpack-plugin":"2.1.3","webpack":"4.35.0","webpack-cli":"3.3.4","webpack-dev-server":"3.7.2"},"preferGlobal":false,"private":false,"main":"./lib/index.js","types":"./lib/index.d.ts","author":{"name":"RingCentral, Inc.","email":"devsupport@ringcentral.com"},"contributors":[{"name":"Kirill Konshin"},{"name":"Elias Sun"}],"repository":{"type":"git","url":"git://github.com/ringcentral/ringcentral-web-phone.git"},"bugs":{"url":"https://github.com/ringcentral/ringcentral-web-phone/issues"},"homepage":"https://github.com/ringcentral/ringcentral-web-phone","engines":{"node":">=0.10.36"},"license":"MIT"};
+module.exports = {"name":"ringcentral-web-phone","version":"0.8.7","scripts":{"test":"npm run test:ut && npm run test:e2e","test:coverage":"cat .coverage/lcov.info | coveralls -v","test:e2e":"jest --config jest.config.e2e.js --runInBand","test:ut":"jest --config jest.config.ut.js","build":"npm run build:tsc && npm run build:webpack","build:tsc":"tsc","build:webpack":"cross-env NODE_ENV=production webpack --config webpack.config.js --progress --color","start":"webpack-dev-server --config webpack.config.js --progress --color","server":"http-server --port ${PORT:-8080}","watch":"npm-run-all --print-label --parallel \"build:** -- --watch\"","lint":"eslint --cache --cache-location node_modules/.cache/eslint --fix","lint:all":"npm run lint \"src/**/*.ts\" \"demo/**/*.js\"","lint:staged":"lint-staged"},"dependencies":{"getstats":"1.2.0","sip.js":"0.13.5"},"devDependencies":{"@types/expect-puppeteer":"3.3.1","@types/jest":"24.0.15","@types/jest-environment-puppeteer":"4.0.0","@types/node":"12.0.8","bootstrap":"3.4.1","cache-loader":"4.0.0","copy-webpack-plugin":"5.0.3","coveralls":"3.0.4","cross-env":"5.2.0","dotenv":"8.0.0","eslint":"6.8.0","eslint-config-ringcentral-typescript":"3.0.0","html-webpack-plugin":"3.2.0","http-server":"0.11.1","husky":"2.4.1","istanbul-instrumenter-loader":"3.0.1","jest":"24.8.0","jest-puppeteer":"4.2.0","jquery":"3.4.1","lint-staged":"8.2.1","npm-run-all":"4.1.5","puppeteer":"1.18.0","ringcentral":"3.2.2","ts-jest":"24.0.2","ts-loader":"6.0.3","typescript":"3.9.2","uglifyjs-webpack-plugin":"2.1.3","webpack":"4.35.0","webpack-cli":"3.3.4","webpack-dev-server":"3.7.2"},"preferGlobal":false,"private":false,"main":"./lib/index.js","types":"./lib/index.d.ts","author":{"name":"RingCentral, Inc.","email":"devsupport@ringcentral.com"},"contributors":[{"name":"Kirill Konshin"},{"name":"Elias Sun"}],"repository":{"type":"git","url":"git://github.com/ringcentral/ringcentral-web-phone.git"},"bugs":{"url":"https://github.com/ringcentral/ringcentral-web-phone/issues"},"homepage":"https://github.com/ringcentral/ringcentral-web-phone","engines":{"node":">=0.10.36"},"license":"MIT"};
 
 /***/ })
 /******/ ])["default"];
