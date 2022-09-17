@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("sip.js"), require("getstats"));
+		module.exports = factory(require("sip.js"));
 	else if(typeof define === 'function' && define.amd)
-		define(["sip.js", "getstats"], factory);
+		define(["sip.js"], factory);
 	else if(typeof exports === 'object')
-		exports["WebPhone"] = factory(require("sip.js"), require("getstats"));
+		exports["WebPhone"] = factory(require("sip.js"));
 	else
-		root["RingCentral"] = root["RingCentral"] || {}, root["RingCentral"]["WebPhone"] = factory(root["SIP"], root["getStats"]);
-})(window, function(__WEBPACK_EXTERNAL_MODULE__0__, __WEBPACK_EXTERNAL_MODULE__9__) {
+		root["RingCentral"] = root["RingCentral"] || {}, root["RingCentral"]["WebPhone"] = factory(root["SIP"]);
+})(window, function(__WEBPACK_EXTERNAL_MODULE__0__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -714,7 +714,7 @@ var sip_js_1 = __webpack_require__(0);
 var constants_1 = __webpack_require__(1);
 var utils_1 = __webpack_require__(2);
 var mediaStreams_1 = __importStar(__webpack_require__(3));
-var version = __webpack_require__(12).version;
+var version = __webpack_require__(11).version;
 var WebPhone = /** @class */ (function () {
     /**
      * TODO: include 'WebPhone' for all apps other than Chrome and Glip
@@ -845,7 +845,7 @@ var WebPhone = /** @class */ (function () {
         options.switchBackInterval = this.sipInfo.switchBackInterval;
         this.userAgent = userAgent_1.patchUserAgent(new sip_js_1.UA(configuration), this.sipInfo, options, id);
     }
-    WebPhone.version = '0.8.9';
+    WebPhone.version = '0.8.11';
     WebPhone.uuid = utils_1.uuid;
     WebPhone.delay = utils_1.delay;
     WebPhone.extend = utils_1.extend;
@@ -884,7 +884,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.patchUserAgent = void 0;
 var audioHelper_1 = __webpack_require__(6);
 var session_1 = __webpack_require__(7);
-var sipTransportConstructor_1 = __webpack_require__(11);
+var sipTransportConstructor_1 = __webpack_require__(10);
 exports.patchUserAgent = function (userAgent, sipInfo, options, id) {
     userAgent.defaultHeaders = ['P-rc-endpoint-id: ' + id, 'Client-id:' + options.appKey];
     userAgent.media = {};
@@ -1162,7 +1162,7 @@ var constants_1 = __webpack_require__(1);
 var qos_1 = __webpack_require__(8);
 var utils_1 = __webpack_require__(2);
 var mediaStreams_1 = __webpack_require__(3);
-var rtpReport_1 = __webpack_require__(10);
+var rtpReport_1 = __webpack_require__(9);
 exports.patchSession = function (session) {
     if (session.__patched)
         return session;
@@ -1194,6 +1194,8 @@ exports.patchSession = function (session) {
     session.mute = mute.bind(session);
     session.unmute = unmute.bind(session);
     session.onLocalHold = onLocalHold.bind(session);
+    session.__qosStats = {};
+    session.setQosStats = setQosStats.bind(session);
     session.media = session.ua.media; //TODO Remove
     session.addTrack = addTrack.bind(session);
     session.stopMediaStats = stopMediaStats.bind(session);
@@ -1960,6 +1962,12 @@ function addTrack(remoteAudioEle, localAudioEle) {
         }, mediaCheckTimer);
     }
 }
+function setQosStats(stats) {
+    this.__qosStats.cpuOS = stats.cpuOS || '0:0:0';
+    this.__qosStats.cpuRC = stats.cpuRC || '0:0:0';
+    this.__qosStats.ram = stats.ram || '0:0:0';
+    this.__qosStats.netType = stats.netType || null;
+}
 /*--------------------------------------------------------------------------------------------------------------------*/
 function stopMediaStats() {
     this.logger.log('Stopping media stats collection');
@@ -1989,12 +1997,44 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.startQosStatsCollection = void 0;
-var getstats_1 = __importDefault(__webpack_require__(9));
 var formatFloat = function (input) { return parseFloat(input.toString()).toFixed(2); };
 exports.startQosStatsCollection = function (session) {
     var qosStatsObj = getQoSStatsTemplate();
@@ -2005,62 +2045,90 @@ exports.startQosStatsCollection = function (session) {
     qosStatsObj.remoteID = session.request.headers.To[0].raw || session.request.headers.To[0];
     qosStatsObj.origID = session.request.headers.From[0].raw || session.request.headers.From[0];
     var previousGetStatsResult;
-    if (!getstats_1.default)
-        throw new Error('getStats module was not provided!');
-    getstats_1.default(session.sessionDescriptionHandler.peerConnection, function (getStatsResult) {
-        previousGetStatsResult = getStatsResult;
-        qosStatsObj.status = true;
-        var network = getNetworkType(previousGetStatsResult.connectionType);
-        qosStatsObj.localAddr = previousGetStatsResult.connectionType.local.ipAddress[0];
-        qosStatsObj.remoteAddr = previousGetStatsResult.connectionType.remote.ipAddress[0];
-        previousGetStatsResult.results.forEach(function (item) {
-            if (item.type === 'localcandidate') {
-                qosStatsObj.localcandidate = item;
-            }
-            if (item.type === 'remotecandidate') {
-                qosStatsObj.remotecandidate = item;
-            }
-            if (item.type === 'ssrc' && item.id.includes('send') && session.ua.enableMediaReportLogging) {
-                if (parseInt(item.audioInputLevel, 10) === 0) {
-                    session.logger.log('AudioInputLevel is 0. The local track might be muted or could have potential one-way audio issue. Check Microphone Volume settings.');
-                    session.emit('no-input-volume');
-                }
-            }
-            if (item.type === 'ssrc' && item.id.includes('recv')) {
-                qosStatsObj.jitterBufferDiscardRate = item.googSecondaryDiscardedRate || 0;
-                qosStatsObj.packetLost = item.packetsLost;
-                qosStatsObj.packetsReceived = item.packetsReceived;
-                qosStatsObj.totalSumJitter += parseFloat(item.googJitterBufferMs);
-                qosStatsObj.totalIntervalCount += 1;
-                qosStatsObj.JBM = Math.max(qosStatsObj.JBM, parseFloat(item.googJitterBufferMs));
-                qosStatsObj.netType = addToMap(qosStatsObj.netType, network);
-                if (session.ua.enableMediaReportLogging) {
-                    if (parseInt(item.audioOutputLevel, 10) <= 1) {
-                        session.logger.log('Remote audioOutput level is 1. The remote track might be muted or could have potential one-way audio issue');
-                        session.emit('no-output-volume');
+    var refreshIntervalId = setInterval(function () { return __awaiter(void 0, void 0, void 0, function () {
+        var sessionDescriptionHandler, getStatsResult, network;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    sessionDescriptionHandler = session.sessionDescriptionHandler;
+                    if (!sessionDescriptionHandler || !sessionDescriptionHandler.peerConnection) {
+                        session.logger.error('There is no PeerConnection, can not getStats');
+                        return [2 /*return*/];
                     }
-                }
+                    return [4 /*yield*/, sessionDescriptionHandler.peerConnection.getStats()];
+                case 1:
+                    getStatsResult = _a.sent();
+                    qosStatsObj.status = true;
+                    network = '';
+                    getStatsResult.forEach(function (item) {
+                        switch (item.type) {
+                            case 'local-candidate':
+                                if (item.candidateType === 'srflx') {
+                                    network =
+                                        typeof item.networkType === 'string' ? item.networkType : getNetworkType(item.networkType);
+                                    qosStatsObj.localAddr = item.ip + ':' + item.port;
+                                    qosStatsObj.localcandidate = item;
+                                }
+                                break;
+                            case 'remote-candidate':
+                                if (item.candidateType === 'host') {
+                                    qosStatsObj.remoteAddr = item.ip + ':' + item.port;
+                                    qosStatsObj.remotecandidate = item;
+                                }
+                                break;
+                            case 'inbound-rtp':
+                                qosStatsObj.jitterBufferDiscardRate = item.packetsDiscarded / item.packetsReceived;
+                                qosStatsObj.inboundPacketsLost = item.packetsLost;
+                                qosStatsObj.inboundPacketsReceived = item.packetsReceived; //packetsReceived
+                                var jitterBufferMs = parseFloat(item.jitterBufferEmittedCount) > 0
+                                    ? (parseFloat(item.jitterBufferDelay) / parseFloat(item.jitterBufferEmittedCount)) * 1000
+                                    : 0;
+                                qosStatsObj.totalSumJitter += jitterBufferMs;
+                                qosStatsObj.totalIntervalCount += 1;
+                                qosStatsObj.NLR = formatFloat((item.packetsLost / (item.packetsLost + item.packetsReceived)) * 100);
+                                qosStatsObj.JBM = Math.max(qosStatsObj.JBM, jitterBufferMs);
+                                qosStatsObj.netType = addToMap(qosStatsObj.netType, network);
+                                break;
+                            case 'candidate-pair':
+                                qosStatsObj.RTD = Math.round((item.currentRoundTripTime / 2) * 1000);
+                                break;
+                            case 'outbound-rtp':
+                                qosStatsObj.outboundPacketsSent = item.packetsSent;
+                                break;
+                            case 'remote-inbound-rtp':
+                                qosStatsObj.outboundPacketsLost = item.packetsLost;
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+                    return [2 /*return*/];
             }
         });
-    }, session.ua.qosCollectInterval);
+    }); }, session.ua.qosCollectInterval);
     session.on('terminated', function () {
         previousGetStatsResult && previousGetStatsResult.nomore();
         session.logger.log('Release media streams');
         session.mediaStreams && session.mediaStreams.release();
         publishQosStats(session, qosStatsObj);
+        refreshIntervalId && clearInterval(refreshIntervalId);
     });
 };
 var publishQosStats = function (session, qosStatsObj, options) {
     if (options === void 0) { options = {}; }
     options = options || {};
-    var effectiveType = navigator['connection'].effectiveType || '';
-    var networkType = calculateNetworkUsage(qosStatsObj) || '';
     var targetUrl = options.targetUrl || 'rtcpxr@rtcpxr.ringcentral.com:5060';
     var event = options.event || 'vq-rtcpxr';
     options.expires = 60;
     options.contentType = 'application/vq-rtcpxr';
     options.extraHeaders = (options.extraHeaders || []).concat(session.ua.defaultHeaders);
-    options.extraHeaders.push('p-rc-client-info:' + 'cpuRC=0:0;cpuOS=0:0;netType=' + networkType + ';ram=0:0;effectiveType=' + effectiveType);
+    var cpuOS = session.__qosStats.cpuOS;
+    var cpuRC = session.__qosStats.cpuRC;
+    var ram = session.__qosStats.ram;
+    var networkType = session.__qosStats.netType || calculateNetworkUsage(qosStatsObj) || '';
+    var effectiveType = navigator['connection'].effectiveType || '';
+    options.extraHeaders.push("p-rc-client-info:cpuRC=" + cpuRC + ";cpuOS=" + cpuOS + ";netType=" + networkType + ";ram=" + ram + ";effectiveType=" + effectiveType);
+    session.logger.log("QOS stats " + JSON.stringify(qosStatsObj));
     var calculatedStatsObj = calculateStats(qosStatsObj);
     var body = createPublishBody(calculatedStatsObj);
     var pub = session.ua.publish(targetUrl, event, body, options);
@@ -2079,10 +2147,10 @@ var calculateNetworkUsage = function (qosStatsObj) {
     return networkType.join();
 };
 var calculateStats = function (qosStatsObj) {
-    var rawNLR = (qosStatsObj.packetLost * 100) / (qosStatsObj.packetsReceived + qosStatsObj.packetLost) || 0;
+    var rawNLR = (qosStatsObj.inboundPacketsLost * 100) /
+        (qosStatsObj.inboundPacketsReceived + qosStatsObj.inboundPacketsLost) || 0;
     var rawJBN = qosStatsObj.totalIntervalCount > 0 ? qosStatsObj.totalSumJitter / qosStatsObj.totalIntervalCount : 0;
-    return __assign(__assign({}, qosStatsObj), { NLR: formatFloat(rawNLR), JBN: formatFloat(rawJBN), JDR: formatFloat(qosStatsObj.jitterBufferDiscardRate), MOSLQ: 0 //MOS Score
-     });
+    return __assign(__assign({}, qosStatsObj), { NLR: formatFloat(rawNLR), JBN: formatFloat(rawJBN), JDR: formatFloat(qosStatsObj.jitterBufferDiscardRate), MOSLQ: calculateMos(qosStatsObj.inboundPacketsLost / (qosStatsObj.inboundPacketsLost + qosStatsObj.inboundPacketsReceived)), MOSCQ: calculateMos(qosStatsObj.outboundPacketsLost / (qosStatsObj.outboundPacketsLost + qosStatsObj.outboundPacketsSent)) });
 };
 var createPublishBody = function (calculatedStatsObj) {
     var NLR = calculatedStatsObj.NLR || 0;
@@ -2090,6 +2158,8 @@ var createPublishBody = function (calculatedStatsObj) {
     var JBN = calculatedStatsObj.JBN || 0;
     var JDR = calculatedStatsObj.JDR || 0;
     var MOSLQ = calculatedStatsObj.MOSLQ || 0;
+    var MOSCQ = calculatedStatsObj.MOSCQ || 0;
+    var RTD = calculatedStatsObj.RTD || 0;
     var callID = calculatedStatsObj.callID || '';
     var fromTag = calculatedStatsObj.fromTag || '';
     var toTag = calculatedStatsObj.toTag || '';
@@ -2107,11 +2177,11 @@ var createPublishBody = function (calculatedStatsObj) {
         "LocalMetrics:\r\n" +
         "Timestamps: START=0 STOP=0\r\n" +
         "SessionDesc: PT=0 PD=opus SR=0 FD=0 FPP=0 PPS=0 PLC=0 SSUP=on\r\n" +
-        ("JitterBuffer: JBA=0 JBR=0 JBN=" + JBN + " JBM=" + JBM + " JBX=0\r\n") +
+        ("JitterBuffer: JBA=0 JBR=0 JBN=" + JBN + " JBM=" + formatFloat(JBM) + " JBX=0\r\n") +
         ("PacketLoss: NLR=" + NLR + " JDR=" + JDR + "\r\n") +
         "BurstGapLoss: BLD=0 BD=0 GLD=0 GD=0 GMIN=0\r\n" +
-        "Delay: RTD=0 ESD=0 SOWD=0 IAJ=0\r\n" +
-        ("QualityEst: MOSLQ=" + MOSLQ + " MOSCQ=0.0\r\n") +
+        ("Delay: RTD=" + RTD + " ESD=0 SOWD=0 IAJ=0\r\n") +
+        ("QualityEst: MOSLQ=" + formatFloat(MOSLQ) + " MOSCQ=" + formatFloat(MOSCQ) + "\r\n") +
         ("DialogID: " + callID + ";to-tag=" + toTag + ";from-tag=" + fromTag));
 };
 var getQoSStatsTemplate = function () { return ({
@@ -2128,8 +2198,10 @@ var getQoSStatsTemplate = function () { return ({
         stop: ''
     },
     netType: {},
-    packetLost: 0,
-    packetsReceived: 0,
+    inboundPacketsLost: 0,
+    inboundPacketsReceived: 0,
+    outboundPacketsLost: 0,
+    outboundPacketsSent: 0,
     jitterBufferNominal: 0,
     jitterBufferMax: 0,
     jitterBufferDiscardRate: 0,
@@ -2140,6 +2212,8 @@ var getQoSStatsTemplate = function () { return ({
     JBN: '',
     JDR: '',
     MOSLQ: 0,
+    MOSCQ: 0,
+    RTD: 0,
     status: false,
     localcandidate: {},
     remotecandidate: {}
@@ -2168,16 +2242,49 @@ var getNetworkType = function (connectionType) {
     var networkType = !sysNetwork || sysNetwork === 'unknown' ? localNetwork[0] : sysNetwork;
     return networkType in networkTypeMap ? networkTypeMap[networkType] : networkType;
 };
+function calculateMos(packetLoss) {
+    if (packetLoss <= 0.008) {
+        return 4.5;
+    }
+    if (packetLoss > 0.45) {
+        return 1.0;
+    }
+    var bpl = 17.2647;
+    var r = 93.2062077233 - 95.0 * ((packetLoss * 100) / (packetLoss * 100 + bpl)) + 4;
+    var mos = 2.06405 + 0.031738 * r - 0.000356641 * r * r + 2.93143 * Math.pow(10, -6) * r * r * r;
+    if (mos < 1) {
+        return 1.0;
+    }
+    if (mos > 4.5) {
+        return 4.5;
+    }
+    if (packetLoss >= 0.35 && mos > 2.7) {
+        mos = 2.7;
+    }
+    else if (packetLoss >= 0.3 && mos > 3.0) {
+        mos = 3.0;
+    }
+    else if (packetLoss >= 0.2 && mos > 3.6) {
+        mos = 3.6;
+    }
+    else if (packetLoss >= 0.15 && mos > 3.7) {
+        mos = 3.7;
+    }
+    else if (packetLoss >= 0.1 && mos > 3.9) {
+        mos = 4.1;
+    }
+    else if (packetLoss >= 0.05 && mos > 4.1) {
+        mos = 4.3;
+    }
+    else if (packetLoss >= 0.03 && mos > 4.1) {
+        mos = 4.4;
+    }
+    return mos;
+}
 
 
 /***/ }),
 /* 9 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__9__;
-
-/***/ }),
-/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2200,7 +2307,7 @@ exports.isNoAudio = isNoAudio;
 
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2448,10 +2555,10 @@ function __afterWSConnected() {
 
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module) {
 
-module.exports = {"name":"ringcentral-web-phone","version":"0.8.10","scripts":{"test":"npm run test:ut && npm run test:e2e","test:coverage":"cat .coverage/lcov.info | coveralls -v","test:e2e":"jest --config jest.config.e2e.js --runInBand","test:ut":"jest --config jest.config.ut.js","build":"npm run build:tsc && npm run build:webpack","build:tsc":"tsc","build:webpack":"cross-env NODE_ENV=production webpack --config webpack.config.js --progress --color","start":"webpack-dev-server --config webpack.config.js --progress --color","server":"http-server --port ${PORT:-8080}","watch":"npm-run-all --print-label --parallel \"build:** -- --watch\"","lint":"eslint --cache --cache-location node_modules/.cache/eslint --fix","lint:all":"npm run lint \"src/**/*.ts\" \"demo/**/*.js\"","lint:staged":"lint-staged"},"dependencies":{"getstats":"1.2.0","sip.js":"0.13.5"},"devDependencies":{"@types/expect-puppeteer":"3.3.1","@types/jest":"24.0.15","@types/jest-environment-puppeteer":"4.0.0","@types/node":"17.0.32","bootstrap":"3.4.1","cache-loader":"4.0.0","copy-webpack-plugin":"5.0.3","coveralls":"3.0.4","cross-env":"5.2.0","dotenv":"8.0.0","eslint":"6.8.0","eslint-config-ringcentral-typescript":"3.0.0","html-webpack-plugin":"3.2.0","http-server":"0.11.1","husky":"2.4.1","istanbul-instrumenter-loader":"3.0.1","jest":"24.8.0","jest-puppeteer":"4.2.0","jquery":"3.4.1","lint-staged":"8.2.1","npm-run-all":"4.1.5","puppeteer":"1.18.0","ringcentral":"3.2.2","ts-jest":"24.0.2","ts-loader":"6.0.3","typescript":"3.9.2","uglifyjs-webpack-plugin":"2.1.3","webpack":"4.35.0","webpack-cli":"3.3.4","webpack-dev-server":"3.7.2"},"preferGlobal":false,"private":false,"main":"./lib/index.js","types":"./lib/index.d.ts","author":{"name":"RingCentral, Inc.","email":"devsupport@ringcentral.com"},"contributors":[{"name":"Kirill Konshin"},{"name":"Elias Sun"},{"name":"Vyshakh Babji"}],"repository":{"type":"git","url":"git://github.com/ringcentral/ringcentral-web-phone.git"},"bugs":{"url":"https://github.com/ringcentral/ringcentral-web-phone/issues"},"homepage":"https://github.com/ringcentral/ringcentral-web-phone","engines":{"node":">=0.10.36"},"license":"MIT"};
+module.exports = {"name":"ringcentral-web-phone","version":"0.8.11","scripts":{"test":"npm run test:ut && npm run test:e2e","test:coverage":"cat .coverage/lcov.info | coveralls -v","test:e2e":"jest --config jest.config.e2e.js --runInBand","test:ut":"jest --config jest.config.ut.js","build":"npm run build:tsc && npm run build:webpack","build:tsc":"tsc","build:webpack":"cross-env NODE_ENV=production webpack --config webpack.config.js --progress --color","start":"webpack-dev-server --config webpack.config.js --progress --color","server":"http-server --port ${PORT:-8080}","watch":"npm-run-all --print-label --parallel \"build:** -- --watch\"","lint":"eslint --cache --cache-location node_modules/.cache/eslint --fix","lint:all":"npm run lint \"src/**/*.ts\" \"demo/**/*.js\"","lint:staged":"lint-staged"},"dependencies":{"sip.js":"0.13.5"},"devDependencies":{"@types/expect-puppeteer":"3.3.1","@types/jest":"24.0.15","@types/jest-environment-puppeteer":"4.0.0","@types/node":"17.0.32","bootstrap":"3.4.1","cache-loader":"4.0.0","copy-webpack-plugin":"5.0.3","coveralls":"3.0.4","cross-env":"5.2.0","dotenv":"8.0.0","eslint":"6.8.0","eslint-config-ringcentral-typescript":"3.0.0","html-webpack-plugin":"3.2.0","http-server":"0.11.1","husky":"2.4.1","istanbul-instrumenter-loader":"3.0.1","jest":"24.8.0","jest-puppeteer":"4.2.0","jquery":"3.4.1","lint-staged":"8.2.1","npm-run-all":"4.1.5","puppeteer":"1.18.0","ringcentral":"3.2.2","ts-jest":"24.0.2","ts-loader":"6.0.3","typescript":"3.9.2","uglifyjs-webpack-plugin":"2.1.3","webpack":"4.35.0","webpack-cli":"3.3.4","webpack-dev-server":"3.7.2"},"preferGlobal":false,"private":false,"main":"./lib/index.js","types":"./lib/index.d.ts","author":{"name":"RingCentral, Inc.","email":"devsupport@ringcentral.com"},"contributors":[{"name":"Kirill Konshin"},{"name":"Elias Sun"},{"name":"Vyshakh Babji"}],"repository":{"type":"git","url":"git://github.com/ringcentral/ringcentral-web-phone.git"},"bugs":{"url":"https://github.com/ringcentral/ringcentral-web-phone/issues"},"homepage":"https://github.com/ringcentral/ringcentral-web-phone","engines":{"node":">=0.10.36"},"license":"MIT"};
 
 /***/ })
 /******/ ])["default"];
