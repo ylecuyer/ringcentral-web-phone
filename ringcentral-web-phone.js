@@ -14489,7 +14489,7 @@ var Levels;
 /***/ 147:
 /***/ ((module) => {
 
-module.exports = {"i8":"0.9.0-beta"};
+module.exports = {"i8":"0.9.0"};
 
 /***/ })
 
