@@ -25,7 +25,7 @@ var AudioHelper = /** @class */ (function () {
         this.loadAudio(options);
     }
     AudioHelper.prototype._playSound = function (url, val, volume) {
-        if (!this._enabled || !url) {
+        if (!this._enabled || !url || !this._audio) {
             return this;
         }
         if (!this._audio[url]) {
@@ -43,10 +43,10 @@ var AudioHelper = /** @class */ (function () {
                 this._audio[url].playPromise = this._audio[url].play();
             }
             else {
-                var audio = this._audio[url];
-                if (audio.playPromise !== undefined) {
-                    audio.playPromise.then(function () {
-                        audio.pause();
+                var audio_1 = this._audio[url];
+                if (audio_1.playPromise !== undefined) {
+                    audio_1.playPromise.then(function () {
+                        audio_1.pause();
                     });
                 }
             }
@@ -69,7 +69,7 @@ var AudioHelper = /** @class */ (function () {
         }
         this.volume = volume;
         for (var url in this._audio) {
-            if (this._audio.hasOwnProperty(url)) {
+            if (Object.prototype.hasOwnProperty.call(this._audio, url)) {
                 this._audio[url].volume = volume;
             }
         }
@@ -115,13 +115,13 @@ exports.messages = {
     toVoicemail: { reqid: 11, command: 'toVoicemail' },
     ignore: { reqid: 12, command: 'ignore' },
     receiveConfirm: { reqid: 17, command: 'receiveConfirm' },
-    replyWithMessage: { reqid: 14, command: 'replyWithMessage' }
+    replyWithMessage: { reqid: 14, command: 'replyWithMessage' },
 };
 exports.uuidKey = 'rc-webPhone-uuid';
 exports.responseTimeout = 60000;
 exports.defaultMediaConstraints = {
     audio: true,
-    video: false
+    video: false,
 };
 exports.defaultStunServers = ['stun.l.google.com:19302'];
 exports.defaultSipErrorCodes = ['408', '502', '503', '504'];
@@ -146,7 +146,7 @@ exports.Events = {
         ConnectionAttemptFailure: 'wsConnectionError',
         ConnectionFailure: 'transportError',
         SwitchBackToMainProxy: 'switchBackProxy',
-        Closed: 'closed'
+        Closed: 'closed',
     },
     UserAgent: {
         Registered: 'registered',
@@ -156,7 +156,7 @@ exports.Events = {
         Invite: 'invite',
         ProvisionUpdate: 'provisionUpdate',
         Started: 'started',
-        Stopped: 'stopped'
+        Stopped: 'stopped',
     },
     Session: {
         Accepted: 'accepted',
@@ -171,8 +171,8 @@ exports.Events = {
         MoveToRcv: 'moveToRcv',
         QOSPublished: 'qos-published',
         RTPStat: 'rtpStat',
-        UserMediaFailed: 'userMediaFailed'
-    }
+        UserMediaFailed: 'userMediaFailed',
+    },
 };
 
 
@@ -241,7 +241,7 @@ var defaultWebPhoneOptions = {
     transportServers: [],
     turnServers: [],
     uuid: (0, utils_1.uuid)(),
-    uuidKey: constants_1.uuidKey
+    uuidKey: constants_1.uuidKey,
 };
 /**
  * WebPhone class to initiate WebRTC calls
@@ -255,15 +255,20 @@ var WebPhone = /** @class */ (function () {
         if (registrationData === void 0) { registrationData = {}; }
         if (options === void 0) { options = {}; }
         options = Object.assign({}, defaultWebPhoneOptions, options);
-        this.sipInfo = registrationData.sipInfo[0] || registrationData.sipInfo;
+        this.sipInfo = registrationData.sipInfo;
+        if (Array.isArray(this.sipInfo)) {
+            this.sipInfo = this.sipInfo[0];
+        }
         this.uuidKey = options.uuidKey;
         this.appName = options.appName;
         this.appVersion = options.appVersion;
         var id = options.uuid;
         localStorage.setItem(this.uuidKey, id);
         var uaMatch = navigator.userAgent.match(/\((.*?)\)/);
-        var appClientOs = (uaMatch && uaMatch.length && uaMatch[1]).replace(/[^a-zA-Z0-9.:_]+/g, '-') || '';
-        var userAgentString = (this.appName ? this.appName + (this.appVersion ? '/' + this.appVersion : '') + ' ' : '') +
+        var appClientOs = uaMatch === null ? '' : uaMatch[1].replace(/[^a-zA-Z0-9.:_]+/g, '-');
+        var userAgentString = (this.appName
+            ? this.appName + (this.appVersion ? '/' + this.appVersion : '') + ' '
+            : '') +
             (appClientOs ? appClientOs : '') +
             " RCWEBPHONE/".concat(WebPhone.version);
         var modifiers = options.modifiers;
@@ -292,8 +297,8 @@ var WebPhone = /** @class */ (function () {
             peerConnectionConfiguration: {
                 iceServers: iceServers,
                 iceTransportPolicy: iceTransportPolicy,
-                sdpSemantics: sdpSemantics
-            }
+                sdpSemantics: sdpSemantics,
+            },
         };
         sessionDescriptionHandlerFactoryOptions.enableDscp = !!options.enableDscp;
         options.modifiers = modifiers;
@@ -302,7 +307,8 @@ var WebPhone = /** @class */ (function () {
             // FIXME: alwaysAcquireMediaFirst has been removed from SIP.js. Is it the same as earlyMedia?
             options.earlyMedia = true;
         }
-        var sessionDescriptionHandlerFactory = options.sessionDescriptionHandlerFactory || sessionDescriptionHandler_1.defaultSessionDescriptionFactory;
+        var sessionDescriptionHandlerFactory = options.sessionDescriptionHandlerFactory ||
+            sessionDescriptionHandler_1.defaultSessionDescriptionFactory;
         var sipErrorCodes = registrationData.sipErrorCodes && registrationData.sipErrorCodes.length
             ? registrationData.sipErrorCodes
             : constants_1.defaultSipErrorCodes;
@@ -310,19 +316,27 @@ var WebPhone = /** @class */ (function () {
         var maxReconnectionAttempts = options.maxReconnectionAttemptsWithBackup;
         if (this.sipInfo.outboundProxy && this.sipInfo.transport) {
             options.transportServers.push({
-                uri: this.sipInfo.transport.toLowerCase() + '://' + this.sipInfo.outboundProxy
+                uri: this.sipInfo.transport.toLowerCase() +
+                    '://' +
+                    this.sipInfo.outboundProxy,
             });
             reconnectionTimeout = options.reconnectionTimeoutNoBackup;
             maxReconnectionAttempts = options.maxReconnectionAttemptsNoBackup;
         }
         if (this.sipInfo.outboundProxyBackup && this.sipInfo.transport) {
             options.transportServers.push({
-                uri: this.sipInfo.transport.toLowerCase() + '://' + this.sipInfo.outboundProxyBackup
+                uri: this.sipInfo.transport.toLowerCase() +
+                    '://' +
+                    this.sipInfo.outboundProxyBackup,
             });
         }
-        options.reconnectionTimeout = options.reconnectionTimeout || reconnectionTimeout;
-        options.maxReconnectionAttempts = options.maxReconnectionAttempts || maxReconnectionAttempts;
-        var transportServer = options.transportServers.length ? options.transportServers[0].uri : '';
+        options.reconnectionTimeout =
+            options.reconnectionTimeout || reconnectionTimeout;
+        options.maxReconnectionAttempts =
+            options.maxReconnectionAttempts || maxReconnectionAttempts;
+        var transportServer = options.transportServers.length
+            ? options.transportServers[0].uri
+            : '';
         var configuration = {
             uri: sip_js_1.UserAgent.makeURI("sip:".concat(this.sipInfo.username, "@").concat(this.sipInfo.domain)),
             transportOptions: {
@@ -330,21 +344,22 @@ var WebPhone = /** @class */ (function () {
                 traceSip: true,
                 connectionTimeout: 5,
                 keepAliveDebounce: options.keepAliveDebounce,
-                keepAliveInterval: options.keepAliveInterval
+                keepAliveInterval: options.keepAliveInterval,
             },
             // WebPhoneTransport will handle reconnection.
             reconnectionAttempts: 0,
             authorizationUsername: this.sipInfo.authorizationId,
             authorizationPassword: this.sipInfo.password,
-            logLevel: levels_1.Levels[options.logLevel] || constants_1.defaultLogLevel,
+            logLevel: levels_1.Levels[options.logLevel] ||
+                constants_1.defaultLogLevel,
             logBuiltinEnabled: options.builtinEnabled,
-            logConnector: options.connector || null,
+            logConnector: options.connector || undefined,
             autoStart: false,
             autoStop: options.autoStop,
             userAgentString: userAgentString,
             sessionDescriptionHandlerFactoryOptions: sessionDescriptionHandlerFactoryOptions,
             sessionDescriptionHandlerFactory: sessionDescriptionHandlerFactory,
-            allowLegacyNotifications: true
+            allowLegacyNotifications: true,
         };
         options.sipErrorCodes = sipErrorCodes;
         options.switchBackInterval = this.sipInfo.switchBackInterval;
@@ -391,7 +406,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -491,9 +506,11 @@ var MediaStreamsImpl = /** @class */ (function () {
             throw new Error("".concat(this.ktag, ": Cannot initial media stream monitoring. Session is not passed"));
         }
         this.session = session;
-        this.onMediaConnectionStateChange = null;
-        this.onPeerConnectionStateChange = this.onPeerConnectionStateChange.bind(this);
-        var sessionDescriptionHandler = this.session.sessionDescriptionHandler;
+        this.onMediaConnectionStateChange = undefined;
+        this.onPeerConnectionStateChange =
+            this.onPeerConnectionStateChange.bind(this);
+        var sessionDescriptionHandler = this.session
+            .sessionDescriptionHandler;
         sessionDescriptionHandler.peerConnection.addEventListener('iceconnectionstatechange', this.onPeerConnectionStateChange);
         this.isChrome = this.browser() === Browsers.Chrome;
         this.isFirefox = this.browser() === Browsers.Firefox;
@@ -524,7 +541,8 @@ var MediaStreamsImpl = /** @class */ (function () {
         else if (navigator.userAgent.search('Firefox') >= 0) {
             return Browsers.Firefox;
         }
-        else if (navigator.userAgent.search('Safari') >= 0 && navigator.userAgent.search('Chrome') < 0) {
+        else if (navigator.userAgent.search('Safari') >= 0 &&
+            navigator.userAgent.search('Chrome') < 0) {
             return Browsers.Safari;
         }
         else if (navigator.userAgent.search('Opera') >= 0) {
@@ -533,7 +551,8 @@ var MediaStreamsImpl = /** @class */ (function () {
         return 'unknown';
     };
     MediaStreamsImpl.prototype.mediaStatsTimerCallback = function () {
-        var sessionDescriptionHandler = this.session.sessionDescriptionHandler;
+        var sessionDescriptionHandler = this.session
+            .sessionDescriptionHandler;
         var peerConnection = sessionDescriptionHandler.peerConnection;
         if (!peerConnection) {
             this.session.logger.error("".concat(this.ktag, ": The peer connection cannot be null"));
@@ -548,9 +567,10 @@ var MediaStreamsImpl = /** @class */ (function () {
     };
     MediaStreamsImpl.prototype.onPeerConnectionStateChange = function () {
         var eventName = 'unknown';
-        var sessionDescriptionHandler = this.session.sessionDescriptionHandler;
+        var sessionDescriptionHandler = this.session
+            .sessionDescriptionHandler;
         var state = sessionDescriptionHandler.peerConnection.iceConnectionState;
-        if (ConnectionState.hasOwnProperty(state)) {
+        if (Object.prototype.hasOwnProperty.call(ConnectionState, state)) {
             eventName = ConnectionState[state];
             if (this.onMediaConnectionStateChange) {
                 this.onMediaConnectionStateChange(eventName, this.session);
@@ -568,7 +588,8 @@ var MediaStreamsImpl = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        sessionDescriptionHandler = this.session.sessionDescriptionHandler;
+                        sessionDescriptionHandler = this.session
+                            .sessionDescriptionHandler;
                         peerConnection = sessionDescriptionHandler.peerConnection;
                         _a.label = 1;
                     case 1:
@@ -615,7 +636,7 @@ var MediaStreamsImpl = /** @class */ (function () {
                                         }
                                     });
                                     break;
-                                case 'local-candidate':
+                                case 'local-candidate': {
                                     var local_candidate_1 = {};
                                     Object.keys(stat).forEach(function (statName) {
                                         switch (statName) {
@@ -632,7 +653,8 @@ var MediaStreamsImpl = /** @class */ (function () {
                                     });
                                     report.localCandidates.push(local_candidate_1);
                                     break;
-                                case 'remote-candidate':
+                                }
+                                case 'remote-candidate': {
                                     var remote_candidate_1 = {};
                                     Object.keys(stat).forEach(function (statName) {
                                         switch (statName) {
@@ -648,14 +670,19 @@ var MediaStreamsImpl = /** @class */ (function () {
                                     });
                                     report.remoteCandidates.push(remote_candidate_1);
                                     break;
+                                }
                                 case 'media-source':
-                                    report.outboundRtpReport.rtpLocalAudioLevel = stat.audioLevel ? stat.audioLevel : 0;
+                                    report.outboundRtpReport.rtpLocalAudioLevel = stat.audioLevel
+                                        ? stat.audioLevel
+                                        : 0;
                                     break;
                                 case 'track':
                                     if (!stat.remoteSource) {
                                         break;
                                     }
-                                    report.inboundRtpReport.rtpRemoteAudioLevel = stat.audioLevel ? stat.audioLevel : 0;
+                                    report.inboundRtpReport.rtpRemoteAudioLevel = stat.audioLevel
+                                        ? stat.audioLevel
+                                        : 0;
                                     break;
                                 case 'transport':
                                     Object.keys(stat).forEach(function (statName) {
@@ -674,8 +701,8 @@ var MediaStreamsImpl = /** @class */ (function () {
                                     break;
                             }
                         });
-                        if (!report.rttMs.hasOwnProperty('currentRoundTripTime')) {
-                            if (!report.rttMs.hasOwnProperty('roundTripTime')) {
+                        if (!Object.prototype.hasOwnProperty.call(report.rttMs, 'currentRoundTripTime')) {
+                            if (!Object.prototype.hasOwnProperty.call(report.rttMs, 'roundTripTime')) {
                                 report.rttMs.currentRoundTripTime = this.preRTT.currentRoundTripTime;
                             }
                             else {
@@ -686,7 +713,7 @@ var MediaStreamsImpl = /** @class */ (function () {
                         else {
                             report.rttMs.currentRoundTripTime = Math.round(report.rttMs.currentRoundTripTime * 1000);
                         }
-                        if (report.rttMs.hasOwnProperty('currentRoundTripTime')) {
+                        if (Object.prototype.hasOwnProperty.call(report.rttMs, 'currentRoundTripTime')) {
                             this.preRTT.currentRoundTripTime = report.rttMs.currentRoundTripTime;
                         }
                         this.onRTPStat(report, this.session);
@@ -708,7 +735,6 @@ var MediaStreamsImpl = /** @class */ (function () {
      */
     MediaStreamsImpl.prototype.getMediaStats = function (callback, interval) {
         var _this = this;
-        if (callback === void 0) { callback = null; }
         if (interval === void 0) { interval = 1000; }
         if (!this.onRTPStat && !callback) {
             this.session.logger.debug("".concat(this.ktag, ": No event callback provided to call when media starts are generated"));
@@ -731,7 +757,7 @@ var MediaStreamsImpl = /** @class */ (function () {
     MediaStreamsImpl.prototype.stopMediaStats = function () {
         if (this.mediaStatsTimer) {
             clearTimeout(this.mediaStatsTimer);
-            this.onRTPStat = null;
+            this.onRTPStat = undefined;
         }
     };
     /**
@@ -742,8 +768,7 @@ var MediaStreamsImpl = /** @class */ (function () {
     MediaStreamsImpl.prototype.reconnectMedia = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            _this.session
-                .reinvite()
+            _this.session.reinvite()
                 .then(function () { return resolve(); })
                 .catch(reject);
         });
@@ -756,7 +781,8 @@ var MediaStreamsImpl = /** @class */ (function () {
             clearTimeout(this.mediaStatsTimer);
             this.mediaStatsTimer = null;
         }
-        var sessionDescriptionHandler = this.session.sessionDescriptionHandler;
+        var sessionDescriptionHandler = this.session
+            .sessionDescriptionHandler;
         if (!sessionDescriptionHandler.peerConnection) {
             return;
         }
@@ -799,7 +825,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -824,7 +850,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.startQosStatsCollection = void 0;
 var sip_js_1 = __webpack_require__(767);
 var events_1 = __webpack_require__(857);
-var formatFloat = function (input) { return parseFloat(input.toString()).toFixed(2); };
+var formatFloat = function (input) {
+    return parseFloat(input.toString()).toFixed(2);
+};
 var startQosStatsCollection = function (session) {
     var qosStatsObj = getQoSStatsTemplate();
     qosStatsObj.callID = session.request.callId || '';
@@ -833,14 +861,14 @@ var startQosStatsCollection = function (session) {
     qosStatsObj.localID = session.request.getHeader('From');
     qosStatsObj.remoteID = session.request.getHeader('To');
     qosStatsObj.origID = session.request.getHeader('From');
-    var previousGetStatsResult;
     var refreshIntervalId = setInterval(function () { return __awaiter(void 0, void 0, void 0, function () {
         var sessionDescriptionHandler, getStatsResult, network;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     sessionDescriptionHandler = session.sessionDescriptionHandler;
-                    if (!sessionDescriptionHandler || !sessionDescriptionHandler.peerConnection) {
+                    if (!sessionDescriptionHandler ||
+                        !sessionDescriptionHandler.peerConnection) {
                         session.logger.error('There is no PeerConnection, can not getStats');
                         return [2 /*return*/];
                     }
@@ -855,7 +883,9 @@ var startQosStatsCollection = function (session) {
                             case 'local-candidate':
                                 if (item.candidateType === 'srflx') {
                                     network =
-                                        typeof item.networkType === 'string' ? item.networkType : getNetworkType(item.networkType);
+                                        typeof item.networkType === 'string'
+                                            ? item.networkType
+                                            : getNetworkType(item.networkType);
                                     qosStatsObj.localAddr = item.ip + ':' + item.port;
                                     qosStatsObj.localcandidate = item;
                                 }
@@ -866,12 +896,15 @@ var startQosStatsCollection = function (session) {
                                     qosStatsObj.remotecandidate = item;
                                 }
                                 break;
-                            case 'inbound-rtp':
-                                qosStatsObj.jitterBufferDiscardRate = item.packetsDiscarded / item.packetsReceived;
+                            case 'inbound-rtp': {
+                                qosStatsObj.jitterBufferDiscardRate =
+                                    item.packetsDiscarded / item.packetsReceived;
                                 qosStatsObj.inboundPacketsLost = item.packetsLost;
                                 qosStatsObj.inboundPacketsReceived = item.packetsReceived; //packetsReceived
                                 var jitterBufferMs = parseFloat(item.jitterBufferEmittedCount) > 0
-                                    ? (parseFloat(item.jitterBufferDelay) / parseFloat(item.jitterBufferEmittedCount)) * 1000
+                                    ? (parseFloat(item.jitterBufferDelay) /
+                                        parseFloat(item.jitterBufferEmittedCount)) *
+                                        1000
                                     : 0;
                                 qosStatsObj.totalSumJitter += jitterBufferMs;
                                 qosStatsObj.totalIntervalCount += 1;
@@ -879,6 +912,7 @@ var startQosStatsCollection = function (session) {
                                 qosStatsObj.JBM = Math.max(qosStatsObj.JBM, jitterBufferMs);
                                 qosStatsObj.netType = addToMap(qosStatsObj.netType, network);
                                 break;
+                            }
                             case 'candidate-pair':
                                 qosStatsObj.RTD = Math.round((item.currentRoundTripTime / 2) * 1000);
                                 break;
@@ -898,7 +932,6 @@ var startQosStatsCollection = function (session) {
     }); }, session.userAgent.qosCollectInterval);
     session.stateChange.addListener(function (newState) {
         if (newState === sip_js_1.SessionState.Terminated) {
-            previousGetStatsResult && previousGetStatsResult.nomore();
             session.logger.log('Release media streams');
             session.mediaStreams && session.mediaStreams.release();
             publishQosStats(session, qosStatsObj);
@@ -924,7 +957,10 @@ var publishQosStats = function (session, qosStatsObj, options) {
                     cpuRC = session.__qosStats.cpuRC;
                     ram = session.__qosStats.ram;
                     networkType = session.__qosStats.netType || calculateNetworkUsage(qosStatsObj) || '';
-                    effectiveType = navigator['connection'].effectiveType || '';
+                    effectiveType = '';
+                    if ('connection' in navigator) {
+                        effectiveType = navigator.connection.effectiveType;
+                    }
                     options.extraHeaders.push("p-rc-client-info:cpuRC=".concat(cpuRC, ";cpuOS=").concat(cpuOS, ";netType=").concat(networkType, ";ram=").concat(ram, ";effectiveType=").concat(effectiveType));
                     session.logger.log("QOS stats ".concat(JSON.stringify(qosStatsObj)));
                     calculatedStatsObj = calculateStats(qosStatsObj);
@@ -949,15 +985,22 @@ var calculateNetworkUsage = function (qosStatsObj) {
     var networkType = [];
     for (var _i = 0, _a = Object.entries(qosStatsObj.netType); _i < _a.length; _i++) {
         var _b = _a[_i], key = _b[0], value = _b[1];
-        networkType.push(key + ':' + formatFloat((value * 100) / qosStatsObj.totalIntervalCount));
+        networkType.push(key +
+            ':' +
+            formatFloat((value * 100) / qosStatsObj.totalIntervalCount));
     }
     return networkType.join();
 };
 var calculateStats = function (qosStatsObj) {
     var rawNLR = (qosStatsObj.inboundPacketsLost * 100) /
-        (qosStatsObj.inboundPacketsReceived + qosStatsObj.inboundPacketsLost) || 0;
-    var rawJBN = qosStatsObj.totalIntervalCount > 0 ? qosStatsObj.totalSumJitter / qosStatsObj.totalIntervalCount : 0;
-    return __assign(__assign({}, qosStatsObj), { NLR: formatFloat(rawNLR), JBN: formatFloat(rawJBN), JDR: formatFloat(qosStatsObj.jitterBufferDiscardRate), MOSLQ: calculateMos(qosStatsObj.inboundPacketsLost / (qosStatsObj.inboundPacketsLost + qosStatsObj.inboundPacketsReceived)), MOSCQ: calculateMos(qosStatsObj.outboundPacketsLost / (qosStatsObj.outboundPacketsLost + qosStatsObj.outboundPacketsSent)) });
+        (qosStatsObj.inboundPacketsReceived + qosStatsObj.inboundPacketsLost) ||
+        0;
+    var rawJBN = qosStatsObj.totalIntervalCount > 0
+        ? qosStatsObj.totalSumJitter / qosStatsObj.totalIntervalCount
+        : 0;
+    return __assign(__assign({}, qosStatsObj), { NLR: formatFloat(rawNLR), JBN: formatFloat(rawJBN), JDR: formatFloat(qosStatsObj.jitterBufferDiscardRate), MOSLQ: calculateMos(qosStatsObj.inboundPacketsLost /
+            (qosStatsObj.inboundPacketsLost + qosStatsObj.inboundPacketsReceived)), MOSCQ: calculateMos(qosStatsObj.outboundPacketsLost /
+            (qosStatsObj.outboundPacketsLost + qosStatsObj.outboundPacketsSent)) });
 };
 var createPublishBody = function (calculatedStatsObj) {
     var NLR = calculatedStatsObj.NLR || 0;
@@ -974,19 +1017,19 @@ var createPublishBody = function (calculatedStatsObj) {
     var remoteId = calculatedStatsObj.remoteID || '';
     var localAddr = calculatedStatsObj.localAddr || '';
     var remoteAddr = calculatedStatsObj.remoteAddr || '';
-    return ("VQSessionReport: CallTerm\r\n" +
+    return ('VQSessionReport: CallTerm\r\n' +
         "CallID: ".concat(callID, "\r\n") +
         "LocalID: ".concat(localId, "\r\n") +
         "RemoteID: ".concat(remoteId, "\r\n") +
         "OrigID: ".concat(localId, "\r\n") +
         "LocalAddr: IP=".concat(localAddr, " SSRC=0x00000000\r\n") +
         "RemoteAddr: IP=".concat(remoteAddr, " SSRC=0x00000000\r\n") +
-        "LocalMetrics:\r\n" +
-        "Timestamps: START=0 STOP=0\r\n" +
-        "SessionDesc: PT=0 PD=opus SR=0 FD=0 FPP=0 PPS=0 PLC=0 SSUP=on\r\n" +
+        'LocalMetrics:\r\n' +
+        'Timestamps: START=0 STOP=0\r\n' +
+        'SessionDesc: PT=0 PD=opus SR=0 FD=0 FPP=0 PPS=0 PLC=0 SSUP=on\r\n' +
         "JitterBuffer: JBA=0 JBR=0 JBN=".concat(JBN, " JBM=").concat(formatFloat(JBM), " JBX=0\r\n") +
         "PacketLoss: NLR=".concat(NLR, " JDR=").concat(JDR, "\r\n") +
-        "BurstGapLoss: BLD=0 BD=0 GLD=0 GD=0 GMIN=0\r\n" +
+        'BurstGapLoss: BLD=0 BD=0 GLD=0 GD=0 GMIN=0\r\n' +
         "Delay: RTD=".concat(RTD, " ESD=0 SOWD=0 IAJ=0\r\n") +
         "QualityEst: MOSLQ=".concat(formatFloat(MOSLQ), " MOSCQ=").concat(formatFloat(MOSCQ), "\r\n") +
         "DialogID: ".concat(callID, ";to-tag=").concat(toTag, ";from-tag=").concat(fromTag));
@@ -1002,7 +1045,7 @@ var getQoSStatsTemplate = function () { return ({
     toTag: '',
     timestamp: {
         start: '',
-        stop: ''
+        stop: '',
     },
     netType: {},
     jitterBufferNominal: 0,
@@ -1023,31 +1066,32 @@ var getQoSStatsTemplate = function () { return ({
     inboundPacketsLost: 0,
     inboundPacketsReceived: 0,
     outboundPacketsLost: 0,
-    outboundPacketsSent: 0
+    outboundPacketsSent: 0,
 }); };
 var addToMap = function (map, key) {
     var _a;
     if (map === void 0) { map = {}; }
     return (__assign(__assign({}, map), (_a = {}, _a[key] = (key in map ? parseInt(map[key]) : 0) + 1, _a)));
 };
-var networkTypeMap;
-(function (networkTypeMap) {
-    networkTypeMap["bluetooth"] = "Bluetooth";
-    networkTypeMap["cellular"] = "Cellulars";
-    networkTypeMap["ethernet"] = "Ethernet";
-    networkTypeMap["wifi"] = "WiFi";
-    networkTypeMap["vpn"] = "VPN";
-    networkTypeMap["wimax"] = "WiMax";
-    networkTypeMap["2g"] = "2G";
-    networkTypeMap["3g"] = "3G";
-    networkTypeMap["4g"] = "4G";
-})(networkTypeMap || (networkTypeMap = {}));
+var networkTypeMap = {
+    bluetooth: 'Bluetooth',
+    cellular: 'Cellulars',
+    ethernet: 'Ethernet',
+    wifi: 'WiFi',
+    vpn: 'VPN',
+    wimax: 'WiMax',
+    '2g': '2G',
+    '3g': '3G',
+    '4g': '4G',
+};
 //TODO: find reliable way to find network type , use navigator.connection.type?
 var getNetworkType = function (connectionType) {
     var sysNetwork = connectionType.systemNetworkType || 'unknown';
     var localNetwork = connectionType || 'unknown';
     var networkType = !sysNetwork || sysNetwork === 'unknown' ? localNetwork : sysNetwork;
-    return networkType in networkTypeMap ? networkTypeMap[networkType] : networkType;
+    return networkType in networkTypeMap
+        ? networkTypeMap[networkType]
+        : networkType;
 };
 function calculateMos(packetLoss) {
     if (packetLoss <= 0.008) {
@@ -1058,7 +1102,10 @@ function calculateMos(packetLoss) {
     }
     var bpl = 17.2647;
     var r = 93.2062077233 - 95.0 * ((packetLoss * 100) / (packetLoss * 100 + bpl)) + 4;
-    var mos = 2.06405 + 0.031738 * r - 0.000356641 * r * r + 2.93143 * Math.pow(10, -6) * r * r * r;
+    var mos = 2.06405 +
+        0.031738 * r -
+        0.000356641 * r * r +
+        2.93143 * Math.pow(10, -6) * r * r * r;
     if (mos < 1) {
         return 1.0;
     }
@@ -1105,7 +1152,8 @@ function isNoAudio(report) {
     if (!report.outboundRtpReport) {
         return true;
     }
-    if (report.inboundRtpReport.packetsReceived === 0 || report.outboundRtpReport.packetsSent === 0) {
+    if (report.inboundRtpReport.packetsReceived === 0 ||
+        report.outboundRtpReport.packetsSent === 0) {
         return true;
     }
     return false;
@@ -1134,7 +1182,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -1199,7 +1247,8 @@ function patchWebphoneSession(session) {
     session.once = eventEmitter.once.bind(eventEmitter);
     session.addListener = eventEmitter.addListener.bind(eventEmitter);
     session.removeListener = eventEmitter.removeListener.bind(eventEmitter);
-    session.removeAllListeners = eventEmitter.removeAllListeners.bind(eventEmitter);
+    session.removeAllListeners =
+        eventEmitter.removeAllListeners.bind(eventEmitter);
     session.emit = eventEmitter.emit.bind(eventEmitter);
     session.sendInfoAndReceiveResponse = sendInfoAndReceiveResponse.bind(session);
     session.startRecord = startRecord.bind(session);
@@ -1285,13 +1334,13 @@ function canUseRCMCallControl() {
 }
 function createSessionMessage(options) {
     if (!this.rcHeaders) {
-        return undefined;
+        throw Error('createSessionMessage options is undefined');
     }
     (0, utils_1.extend)(options, {
         sid: this.rcHeaders.sid,
         request: this.rcHeaders.request,
         from: this.rcHeaders.to,
-        to: this.rcHeaders.from
+        to: this.rcHeaders.from,
     });
     return this.userAgent.createRcMessage(options);
 }
@@ -1326,7 +1375,7 @@ function sendInfoAndReceiveResponse(command, options) {
             return [2 /*return*/, new Promise(function (resolve, reject) {
                     var requestDelegate = {
                         onAccept: function (response) {
-                            var timeout = null;
+                            var timeout = undefined;
                             var _a = response.message, statusCode = _a.statusCode, callId = _a.callId;
                             if (statusCode === 200) {
                                 var onInfo_1 = function (message) {
@@ -1342,7 +1391,9 @@ function sendInfoAndReceiveResponse(command, options) {
                                     catch (e) {
                                         obj = {};
                                     }
-                                    if (obj.response && obj.response.command === command.command && obj.response.result) {
+                                    if (obj.response &&
+                                        obj.response.command === command.command &&
+                                        obj.response.result) {
                                         timeout && clearTimeout(timeout);
                                         _this.off('RC_SIP_INFO', onInfo_1);
                                         if (obj.response.result.code.toString() === '0') {
@@ -1363,14 +1414,14 @@ function sendInfoAndReceiveResponse(command, options) {
                         },
                         onReject: function (response) {
                             reject(new Error("The INFO response status code is: ".concat(response.message.statusCode, " (waiting for 200)")));
-                        }
+                        },
                     };
                     var requestOptions = {
                         extraHeaders: __spreadArray(__spreadArray([], (options.extraHeaders || []), true), _this.userAgent.defaultHeaders, true),
                         body: (0, core_1.fromBodyLegacy)({
                             body: JSON.stringify({ request: command }),
-                            contentType: 'application/json;charset=utf-8'
-                        })
+                            contentType: 'application/json;charset=utf-8',
+                        }),
                     };
                     _this.info({ requestDelegate: requestDelegate, requestOptions: requestOptions });
                 })];
@@ -1403,22 +1454,26 @@ function sendMoveResponse(reqId, code, description, options) {
                     command: 'move',
                     result: {
                         code: code,
-                        description: description
-                    }
-                }
+                        description: description,
+                    },
+                },
             }),
-            contentType: 'application/json;charset=utf-8'
-        })
+            contentType: 'application/json;charset=utf-8',
+        }),
     };
     this.info({ requestOptions: requestOptions });
 }
 function ignore() {
     var _this = this;
-    return this.sendReceiveConfirm().then(function () { return _this.sendSessionMessage(constants_1.messages.ignore); });
+    return this.sendReceiveConfirm().then(function () {
+        return _this.sendSessionMessage(constants_1.messages.ignore);
+    });
 }
 function toVoicemail() {
     var _this = this;
-    return this.sendReceiveConfirm().then(function () { return _this.sendSessionMessage(constants_1.messages.toVoicemail); });
+    return this.sendReceiveConfirm().then(function () {
+        return _this.sendSessionMessage(constants_1.messages.toVoicemail);
+    });
 }
 function replyWithMessage(replyOptions) {
     var _this = this;
@@ -1493,7 +1548,8 @@ function unmute(silent) {
 }
 function addTrack(remoteAudioEle, localAudioEle) {
     var _this = this;
-    var sessionDescriptionHandler = this.sessionDescriptionHandler;
+    var sessionDescriptionHandler = this
+        .sessionDescriptionHandler;
     var peerConnection = sessionDescriptionHandler.peerConnection;
     var remoteAudio;
     var localAudio;
@@ -1510,7 +1566,7 @@ function addTrack(remoteAudioEle, localAudioEle) {
     }
     // TODO: peerConnecton.remoteMediaStream already has reciver track added thanks to default session description handler. Can we remove this code?
     var remoteStream = new MediaStream();
-    if (peerConnection.getReceivers) {
+    if (peerConnection === null || peerConnection === void 0 ? void 0 : peerConnection.getReceivers) {
         peerConnection.getReceivers().forEach(function (receiver) {
             var rtrack = receiver.track;
             if (rtrack) {
@@ -1529,7 +1585,7 @@ function addTrack(remoteAudioEle, localAudioEle) {
     });
     // TODO: peerConnecton.localMediaStream already has sender track added thanks to default session description handler. Can we remove this code?
     var localStream = new MediaStream();
-    if (peerConnection.getSenders) {
+    if (peerConnection === null || peerConnection === void 0 ? void 0 : peerConnection.getSenders) {
         peerConnection.getSenders().forEach(function (sender) {
             var strack = sender.track;
             if (strack && strack.kind === 'audio') {
@@ -1584,7 +1640,10 @@ function blindTransfer(target, options) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             this.logger.log('Call transfer initiated');
-            target = typeof target === 'string' ? sip_js_1.UserAgent.makeURI("sip:".concat(target, "@").concat(this.userAgent.sipInfo.domain)) : target;
+            target =
+                typeof target === 'string'
+                    ? sip_js_1.UserAgent.makeURI("sip:".concat(target, "@").concat(this.userAgent.sipInfo.domain))
+                    : target;
             return [2 /*return*/, this.refer(target, options)];
         });
     });
@@ -1594,7 +1653,10 @@ function warmTransfer(target, options) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             options.requestOptions.extraHeaders = (options.requestOptions.extraHeaders || []).concat(this.userAgent.defaultHeaders);
-            target = typeof target === 'string' ? sip_js_1.UserAgent.makeURI("sip:".concat(target, "@").concat(this.userAgent.sipInfo.domain)) : target;
+            target =
+                typeof target === 'string'
+                    ? sip_js_1.UserAgent.makeURI("sip:".concat(target, "@").concat(this.userAgent.sipInfo.domain))
+                    : target;
             this.logger.log('Completing warm transfer');
             return [2 /*return*/, this.refer(target, options)];
         });
@@ -1625,7 +1687,7 @@ function reinvite(options) {
     options.sessionDescriptionHandlerOptions = Object.assign({}, options.sessionDescriptionHandlerOptions, {
         offerToReceiveAudio: true,
         offerToReceiveVideo: false,
-        iceRestart: true
+        iceRestart: true,
     });
     options.requestDelegate = options.requestDelegate || {};
     var originalOnAccept = (_a = options.requestDelegate.onAccept) === null || _a === void 0 ? void 0 : _a.bind(options.requestDelegate);
@@ -1689,7 +1751,8 @@ function dtmf(dtmf, duration, interToneGap) {
     if (interToneGap === void 0) { interToneGap = 50; }
     duration = parseInt(duration.toString());
     interToneGap = parseInt(interToneGap.toString());
-    var sessionDescriptionHandler = this.sessionDescriptionHandler;
+    var sessionDescriptionHandler = this
+        .sessionDescriptionHandler;
     var peerConnection = sessionDescriptionHandler.peerConnection;
     if (!peerConnection) {
         this.logger.error('Peer connection closed.');
@@ -1702,8 +1765,7 @@ function dtmf(dtmf, duration, interToneGap) {
         this.logger.log("Send DTMF: ".concat(dtmf, " Duration: ").concat(duration, " InterToneGap: ").concat(interToneGap));
         return dtmfSender.insertDTMF(dtmf, duration, interToneGap);
     }
-    var sender = dtmfSender && !dtmfSender.canInsertDTMF ? "can't insert DTMF" : 'Unknown';
-    throw new Error('Send DTMF failed: ' + (!dtmfSender ? 'no sender' : sender));
+    throw new Error('Send DTMF failed');
 }
 function accept(options) {
     if (options === void 0) { options = {}; }
@@ -1717,7 +1779,9 @@ function accept(options) {
                     options.sessionDescriptionHandlerOptions = Object.assign({}, options.sessionDescriptionHandlerOptions);
                     options.sessionDescriptionHandlerOptions.constraints =
                         options.sessionDescriptionHandlerOptions.constraints ||
-                            Object.assign({}, this.userAgent.constraints, { optional: [{ DtlsSrtpKeyAgreement: 'true' }] });
+                            Object.assign({}, this.userAgent.constraints, {
+                                optional: [{ DtlsSrtpKeyAgreement: 'true' }],
+                            });
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
@@ -1726,10 +1790,10 @@ function accept(options) {
                     _a.sent();
                     this.startTime = new Date();
                     this.emit(events_2.Events.Session.Accepted, this.request);
-                    return [2 /*return*/, this];
+                    return [3 /*break*/, 4];
                 case 3:
                     e_3 = _a.sent();
-                    if (e_3.message.indexOf('Permission denied') > -1) {
+                    if (e_3.message.indexOf('Permission denied') !== -1) {
                         this.emit(events_2.Events.Session.UserMediaFailed);
                     }
                     return [3 /*break*/, 4];
@@ -1769,14 +1833,17 @@ function dispose() {
 function parseRcHeaderString(str) {
     if (str === void 0) { str = ''; }
     var pairs = str.split(/; */).filter(function (pair) { return pair.includes('='); }); // skip things that don't look like key=value
-    return pairs.reduce(function (seed, pair) {
+    var result = {};
+    for (var _i = 0, pairs_1 = pairs; _i < pairs_1.length; _i++) {
+        var pair = pairs_1[_i];
         var _a = pair.split('='), key = _a[0], value = _a[1];
         key = key.trim();
         value = value.trim();
-        // only assign once
-        seed[key] = seed[key] || value;
-        return seed;
-    }, {});
+        if (!(key in result)) {
+            result[key] = value;
+        }
+    }
+    return result;
 }
 function parseRcHeader(session) {
     var prc = session.request.getHeader('P-Rc');
@@ -1788,10 +1855,10 @@ function parseRcHeader(session) {
         var bdyNode = xmlDoc.getElementsByTagName('Bdy')[0];
         if (hdrNode) {
             session.rcHeaders = {
-                sid: hdrNode.getAttribute('SID'),
-                request: hdrNode.getAttribute('Req'),
-                from: hdrNode.getAttribute('From'),
-                to: hdrNode.getAttribute('To')
+                sid: hdrNode.getAttribute('SID') || undefined,
+                request: hdrNode.getAttribute('Req') || undefined,
+                from: hdrNode.getAttribute('From') || undefined,
+                to: hdrNode.getAttribute('To') || undefined,
             };
         }
         if (bdyNode) {
@@ -1799,7 +1866,7 @@ function parseRcHeader(session) {
                 srvLvl: bdyNode.getAttribute('SrvLvl'),
                 srvLvlExt: bdyNode.getAttribute('SrvLvlExt'),
                 nm: bdyNode.getAttribute('Nm'),
-                toNm: bdyNode.getAttribute('ToNm')
+                toNm: bdyNode.getAttribute('ToNm'),
             });
         }
     }
@@ -1870,7 +1937,8 @@ function setHold(session, hold) {
                         localSdp = peerConnection.localDescription.sdp;
                         match = localSdp.match(/a=(sendrecv|sendonly|recvonly|inactive)/);
                         direction = match ? match[1] : '';
-                        session.__localHold = response.message.statusCode === 200 && direction === 'sendonly';
+                        session.__localHold =
+                            response.message.statusCode === 200 && direction === 'sendonly';
                         session.logger.log('localhold is set to ' + session.__localHold);
                         enableReceiverTracks(session, !session.held);
                         enableSenderTracks(session, !session.held && !session.muted);
@@ -1883,8 +1951,8 @@ function setHold(session, hold) {
                     enableReceiverTracks(session, !session.held);
                     enableSenderTracks(session, !session.held && !session.muted);
                     reject();
-                }
-            }
+                },
+            },
         };
         // Session properties used to pass options to the SessionDescriptionHandler:
         //
@@ -1903,7 +1971,8 @@ function setHold(session, hold) {
         //    - May optionally be set via options passed to Session.invite().
         var sessionDescriptionHandlerOptions = session.sessionDescriptionHandlerOptionsReInvite;
         sessionDescriptionHandlerOptions.hold = hold;
-        session.sessionDescriptionHandlerOptionsReInvite = sessionDescriptionHandlerOptions;
+        session.sessionDescriptionHandlerOptionsReInvite =
+            sessionDescriptionHandlerOptions;
         // Send re-INVITE
         session
             .invite(options)
@@ -1914,7 +1983,7 @@ function setHold(session, hold) {
         })
             .catch(function (error) {
             if (error instanceof sip_js_1.RequestPendingError) {
-                session.logger.error("A hold request is already in progress.");
+                session.logger.error('A hold request is already in progress.');
             }
             reject(error);
         });
@@ -1942,10 +2011,16 @@ function setupUserAgentCoreEvent(session) {
         return;
     }
     var userAgentCore = session.userAgent.userAgentCore;
-    userAgentCore.on(events_2.Events.Session.UpdateReceived, function (payload) { return session.emit(events_2.Events.Session.UpdateReceived, payload); });
-    userAgentCore.on(events_2.Events.Session.MoveToRcv, function (payload) { return session.emit(events_2.Events.Session.MoveToRcv, payload); });
+    userAgentCore.on(events_2.Events.Session.UpdateReceived, function (payload) {
+        return session.emit(events_2.Events.Session.UpdateReceived, payload);
+    });
+    userAgentCore.on(events_2.Events.Session.MoveToRcv, function (payload) {
+        return session.emit(events_2.Events.Session.MoveToRcv, payload);
+    });
     // RC_SIP_INFO event is for internal use
-    userAgentCore.on('RC_SIP_INFO', function (payload) { return session.emit('RC_SIP_INFO', payload); });
+    userAgentCore.on('RC_SIP_INFO', function (payload) {
+        return session.emit('RC_SIP_INFO', payload);
+    });
     session.__userAgentCoreEventsSetup = true;
 }
 function stopMediaStreamStats(session) {
@@ -1961,7 +2036,7 @@ function setQosStats(stats) {
     this.__qosStats.cpuOS = stats.cpuOS || '0:0:0';
     this.__qosStats.cpuRC = stats.cpuRC || '0:0:0';
     this.__qosStats.ram = stats.ram || '0:0:0';
-    this.__qosStats.netType = stats.netType || null;
+    this.__qosStats.netType = stats.netType || undefined;
 }
 
 
@@ -2003,7 +2078,8 @@ var SessionDescriptionHandler = /** @class */ (function () {
         logger.debug('SessionDescriptionHandler.constructor');
         this.logger = logger;
         this.mediaStreamFactory = mediaStreamFactory;
-        this.sessionDescriptionHandlerConfiguration = sessionDescriptionHandlerConfiguration;
+        this.sessionDescriptionHandlerConfiguration =
+            sessionDescriptionHandlerConfiguration;
         this._localMediaStream = new MediaStream();
         this._remoteMediaStream = new MediaStream();
         this._peerConnection = new RTCPeerConnection(sessionDescriptionHandlerConfiguration === null || sessionDescriptionHandlerConfiguration === void 0 ? void 0 : sessionDescriptionHandlerConfiguration.peerConnectionConfiguration);
@@ -2152,14 +2228,18 @@ var SessionDescriptionHandler = /** @class */ (function () {
             .then(function () { return _this.updateDirection(options); })
             .then(function () { return _this.createDataChannel(options); })
             .then(function () { return _this.createLocalOfferOrAnswer(options); })
-            .then(function (sessionDescription) { return _this.applyModifiers(sessionDescription, modifiers); })
-            .then(function (sessionDescription) { return _this.setLocalSessionDescription(sessionDescription); })
+            .then(function (sessionDescription) {
+            return _this.applyModifiers(sessionDescription, modifiers);
+        })
+            .then(function (sessionDescription) {
+            return _this.setLocalSessionDescription(sessionDescription);
+        })
             .then(function () { return _this.waitForIceGatheringComplete(iceRestart, iceTimeout); })
             .then(function () { return _this.getLocalSessionDescription(); })
             .then(function (sessionDescription) {
             return {
                 body: sessionDescription.sdp,
-                contentType: 'application/sdp'
+                contentType: 'application/sdp',
             };
         })
             .catch(function (error) {
@@ -2224,10 +2304,14 @@ var SessionDescriptionHandler = /** @class */ (function () {
         // Callback on data channel creation
         this.onDataChannel = options === null || options === void 0 ? void 0 : options.onDataChannel;
         // SDP type
-        var type = this._peerConnection.signalingState === 'have-local-offer' ? 'answer' : 'offer';
+        var type = this._peerConnection.signalingState === 'have-local-offer'
+            ? 'answer'
+            : 'offer';
         return this.getLocalMediaStream(options)
             .then(function () { return _this.applyModifiers({ sdp: sdp, type: type }, modifiers); })
-            .then(function (sessionDescription) { return _this.setRemoteSessionDescription(sessionDescription); })
+            .then(function (sessionDescription) {
+            return _this.setRemoteSessionDescription(sessionDescription);
+        })
             .catch(function (error) {
             _this.logger.error('SessionDescriptionHandler.setDescription failed - ' + error);
             throw error;
@@ -2337,11 +2421,15 @@ var SessionDescriptionHandler = /** @class */ (function () {
         // if we already have a local media stream...
         if (this.localMediaStreamConstraints) {
             // ignore constraint "downgrades"
-            constraints.audio = constraints.audio || this.localMediaStreamConstraints.audio;
-            constraints.video = constraints.video || this.localMediaStreamConstraints.video;
+            constraints.audio =
+                constraints.audio || this.localMediaStreamConstraints.audio;
+            constraints.video =
+                constraints.video || this.localMediaStreamConstraints.video;
             // if constraints have not changed, do not get a new media stream
-            if (JSON.stringify(this.localMediaStreamConstraints.audio) === JSON.stringify(constraints.audio) &&
-                JSON.stringify(this.localMediaStreamConstraints.video) === JSON.stringify(constraints.video)) {
+            if (JSON.stringify(this.localMediaStreamConstraints.audio) ===
+                JSON.stringify(constraints.audio) &&
+                JSON.stringify(this.localMediaStreamConstraints.video) ===
+                    JSON.stringify(constraints.video)) {
                 return Promise.resolve();
             }
         }
@@ -2361,23 +2449,24 @@ var SessionDescriptionHandler = /** @class */ (function () {
      *
      */
     SessionDescriptionHandler.prototype.enableSenderDscp = function () {
-        if (!this.sessionDescriptionHandlerConfiguration.enableDscp) {
-            return Promise.resolve();
+        var _a;
+        if (!((_a = this.sessionDescriptionHandlerConfiguration) === null || _a === void 0 ? void 0 : _a.enableDscp)) {
+            return Promise.all([]);
         }
         if (!this._peerConnection) {
             throw new Error('Peer connection undefined.');
         }
-        var pc = this._peerConnection;
-        pc.getSenders()
+        return Promise.all(this._peerConnection
+            .getSenders()
             .filter(function (sender) { return sender.track; })
-            .forEach(function (sender) {
+            .map(function (sender) {
             var parameters = sender.getParameters();
             console.info('getsender params =', parameters);
             parameters.priority = 'high';
-            sender.setParameters(parameters).catch(function (error) {
+            return sender.setParameters(parameters).catch(function (error) {
                 console.error("Error while setting encodings parameters for ".concat(sender.track.kind, " Track ").concat(sender.track.id, ": ").concat(error.message || error.name));
             });
-        });
+        }));
     };
     /**
      * Sets the peer connection's sender tracks and local media stream tracks.
@@ -2403,7 +2492,9 @@ var SessionDescriptionHandler = /** @class */ (function () {
                 throw new Error("Unknown new track kind ".concat(kind, "."));
             }
             var s = pc.getSenders();
-            var sender = pc.getSenders().find(function (sender) { return sender.track && sender.track.kind === kind; });
+            var sender = pc
+                .getSenders()
+                .find(function (sender) { return sender.track && sender.track.kind === kind; });
             if (sender) {
                 trackUpdates.push(new Promise(function (resolve) {
                     _this.logger.debug("SessionDescriptionHandler.setLocalMediaStream - replacing sender ".concat(kind, " track"));
@@ -2412,7 +2503,9 @@ var SessionDescriptionHandler = /** @class */ (function () {
                     return sender
                         .replaceTrack(newTrack)
                         .then(function () {
-                        var oldTrack = localStream.getTracks().find(function (localTrack) { return localTrack.kind === kind; });
+                        var oldTrack = localStream
+                            .getTracks()
+                            .find(function (localTrack) { return localTrack.kind === kind; });
                         if (oldTrack) {
                             oldTrack.stop();
                             localStream.removeTrack(oldTrack);
@@ -2703,7 +2796,8 @@ var SessionDescriptionHandler = /** @class */ (function () {
                     // set the transceiver direction to the answer direction
                     this._peerConnection.getTransceivers().forEach(function (transceiver) {
                         if (transceiver.direction /* guarding, but should always be true */) {
-                            if (transceiver.direction !== 'stopped' && transceiver.direction !== answerDirection_1) {
+                            if (transceiver.direction !== 'stopped' &&
+                                transceiver.direction !== answerDirection_1) {
                                 transceiver.direction = answerDirection_1;
                             }
                         }
@@ -2760,7 +2854,8 @@ var SessionDescriptionHandler = /** @class */ (function () {
         // only one may be waiting, reject any prior
         if (this.iceGatheringCompletePromise !== undefined) {
             this.logger.debug('SessionDescriptionHandler.waitForIceGatheringToComplete - rejecting prior waiting promise');
-            this.iceGatheringCompleteReject && this.iceGatheringCompleteReject(new Error('Promise superseded.'));
+            this.iceGatheringCompleteReject &&
+                this.iceGatheringCompleteReject(new Error('Promise superseded.'));
             this.iceGatheringCompletePromise = undefined;
             this.iceGatheringCompleteResolve = undefined;
             this.iceGatheringCompleteReject = undefined;
@@ -2769,7 +2864,8 @@ var SessionDescriptionHandler = /** @class */ (function () {
             _this.iceGatheringCompleteResolve = resolve;
             _this.iceGatheringCompleteReject = reject;
             if (timeout > 0) {
-                _this.logger.debug('SessionDescriptionHandler.waitForIceGatheringToComplete - timeout in ' + timeout);
+                _this.logger.debug('SessionDescriptionHandler.waitForIceGatheringToComplete - timeout in ' +
+                    timeout);
                 _this.iceGatheringCompleteTimeoutId = setTimeout(function () {
                     _this.logger.debug('SessionDescriptionHandler.waitForIceGatheringToComplete - timeout');
                     _this.iceGatheringComplete();
@@ -2798,7 +2894,7 @@ var SessionDescriptionHandler = /** @class */ (function () {
         };
         peerConnection.ondatachannel = function (event) {
             var _a;
-            _this.logger.debug("SessionDescriptionHandler.ondatachannel");
+            _this.logger.debug('SessionDescriptionHandler.ondatachannel');
             _this._dataChannel = event.channel;
             if (_this.onDataChannel) {
                 _this.onDataChannel(_this._dataChannel);
@@ -2809,18 +2905,18 @@ var SessionDescriptionHandler = /** @class */ (function () {
         };
         peerConnection.onicecandidate = function (event) {
             var _a;
-            _this.logger.debug("SessionDescriptionHandler.onicecandidate");
+            _this.logger.debug('SessionDescriptionHandler.onicecandidate');
             if ((_a = _this._peerConnectionDelegate) === null || _a === void 0 ? void 0 : _a.onicecandidate) {
                 _this._peerConnectionDelegate.onicecandidate(event);
             }
         };
-        peerConnection.onicecandidateerror = function (event) {
+        peerConnection.onicecandidateerror = (function (event) {
             var _a;
-            _this.logger.debug("SessionDescriptionHandler.onicecandidateerror");
+            _this.logger.debug('SessionDescriptionHandler.onicecandidateerror');
             if ((_a = _this._peerConnectionDelegate) === null || _a === void 0 ? void 0 : _a.onicecandidateerror) {
                 _this._peerConnectionDelegate.onicecandidateerror(event);
             }
-        };
+        });
         peerConnection.oniceconnectionstatechange = function (event) {
             var _a;
             var newState = peerConnection.iceConnectionState;
@@ -2842,7 +2938,7 @@ var SessionDescriptionHandler = /** @class */ (function () {
         };
         peerConnection.onnegotiationneeded = function (event) {
             var _a;
-            _this.logger.debug("SessionDescriptionHandler.onnegotiationneeded");
+            _this.logger.debug('SessionDescriptionHandler.onnegotiationneeded');
             if ((_a = _this._peerConnectionDelegate) === null || _a === void 0 ? void 0 : _a.onnegotiationneeded) {
                 _this._peerConnectionDelegate.onnegotiationneeded(event);
             }
@@ -2884,7 +2980,7 @@ function defaultPeerConnectionConfiguration() {
         iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
         iceTransportPolicy: 'all',
         peerIdentity: undefined,
-        rtcpMuxPolicy: 'require'
+        rtcpMuxPolicy: 'require',
     };
 }
 exports.defaultPeerConnectionConfiguration = defaultPeerConnectionConfiguration;
@@ -2908,12 +3004,14 @@ exports.defaultMediaStreamFactory = defaultMediaStreamFactory;
 var defaultSessionDescriptionFactory = function (session, options) {
     var mediaStreamFactory = defaultMediaStreamFactory();
     // make sure we allow `0` to be passed in so timeout can be disabled
-    var iceGatheringTimeout = (options === null || options === void 0 ? void 0 : options.iceGatheringTimeout) !== undefined ? options === null || options === void 0 ? void 0 : options.iceGatheringTimeout : 5000;
+    var iceGatheringTimeout = (options === null || options === void 0 ? void 0 : options.iceGatheringTimeout) !== undefined
+        ? options === null || options === void 0 ? void 0 : options.iceGatheringTimeout
+        : 5000;
     // merge passed factory options into default session description configuration
     var sessionDescriptionHandlerConfiguration = {
         iceGatheringTimeout: iceGatheringTimeout,
         enableDscp: options.enableDscp,
-        peerConnectionConfiguration: __assign(__assign({}, defaultPeerConnectionConfiguration()), options === null || options === void 0 ? void 0 : options.peerConnectionConfiguration)
+        peerConnectionConfiguration: __assign(__assign({}, defaultPeerConnectionConfiguration()), options === null || options === void 0 ? void 0 : options.peerConnectionConfiguration),
     };
     var logger = session.userAgent.getLogger('sip.SessionDescriptionHandler');
     return new SessionDescriptionHandler(logger, mediaStreamFactory, sessionDescriptionHandlerConfiguration);
@@ -2942,7 +3040,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -2978,21 +3076,25 @@ function createWebPhoneTransport(transport, options) {
     transport.once = eventEmitter.once.bind(eventEmitter);
     transport.addListener = eventEmitter.addListener.bind(eventEmitter);
     transport.removeListener = eventEmitter.removeListener.bind(eventEmitter);
-    transport.removeAllListeners = eventEmitter.removeAllListeners.bind(eventEmitter);
+    transport.removeAllListeners =
+        eventEmitter.removeAllListeners.bind(eventEmitter);
     transport.emit = eventEmitter.emit.bind(eventEmitter);
     transport.mainProxy = options.transportServers[0];
     transport.switchBackInterval = options.switchBackInterval;
     transport.reconnectionTimeout = options.reconnectionTimeout;
     transport.maxReconnectionAttempts = options.maxReconnectionAttempts;
     transport.__afterWSConnected = __afterWSConnected.bind(transport);
-    transport.__clearSwitchBackToMainProxyTimer = __clearSwitchBackToMainProxyTimer.bind(transport);
+    transport.__clearSwitchBackToMainProxyTimer =
+        __clearSwitchBackToMainProxyTimer.bind(transport);
     transport.__computeRandomTimeout = __computeRandomTimeout.bind(transport);
     transport.__connect = transport.connect;
     transport.__isCurrentMainProxy = __isCurrentMainProxy.bind(transport);
     transport.__onConnectedToBackup = __onConnectedToBackup.bind(transport);
     transport.__onConnectedToMain = __onConnectedToMain.bind(transport);
-    transport.__resetServersErrorStatus = __resetServersErrorStatus.bind(transport);
-    transport.__scheduleSwitchBackToMainProxy = __scheduleSwitchBackToMainProxy.bind(transport);
+    transport.__resetServersErrorStatus =
+        __resetServersErrorStatus.bind(transport);
+    transport.__scheduleSwitchBackToMainProxy =
+        __scheduleSwitchBackToMainProxy.bind(transport);
     transport.__setServerIsError = __setServerIsError.bind(transport);
     transport.connect = __connect.bind(transport);
     transport.getNextWsServer = getNextWsServer.bind(transport);
@@ -3044,7 +3146,9 @@ function __computeRandomTimeout(reconnectionAttempts, randomMinInterval, randomM
     if (reconnectionAttempts === void 0) { reconnectionAttempts = 1; }
     if (randomMinInterval === void 0) { randomMinInterval = 0; }
     if (randomMaxInterval === void 0) { randomMaxInterval = 0; }
-    if (randomMinInterval < 0 || randomMaxInterval < 0 || reconnectionAttempts < 1) {
+    if (randomMinInterval < 0 ||
+        randomMaxInterval < 0 ||
+        reconnectionAttempts < 1) {
         throw new Error('Arguments must be positive numbers');
     }
     var randomInterval = Math.floor(Math.random() * Math.abs(randomMaxInterval - randomMinInterval)) + randomMinInterval;
@@ -3067,7 +3171,9 @@ function __isCurrentMainProxy() {
     return this.server === this.servers[0].uri;
 }
 function __afterWSConnected() {
-    this.__isCurrentMainProxy() ? this.__onConnectedToMain() : this.__onConnectedToBackup();
+    this.__isCurrentMainProxy()
+        ? this.__onConnectedToMain()
+        : this.__onConnectedToBackup();
 }
 function __onConnectedToMain() {
     this.__clearSwitchBackToMainProxyTimer();
@@ -3080,11 +3186,15 @@ function __onConnectedToBackup() {
 function __scheduleSwitchBackToMainProxy() {
     var _this = this;
     var randomInterval = 15 * 60 * 1000; //15 min
-    var switchBackInterval = this.switchBackInterval ? this.switchBackInterval * 1000 : null;
+    var switchBackInterval = this.switchBackInterval
+        ? this.switchBackInterval * 1000
+        : null;
     // Add random time to expand clients connections in time;
     if (switchBackInterval) {
         switchBackInterval += this.__computeRandomTimeout(1, 0, randomInterval);
-        this.logger.warn('Try to switch back to main proxy after ' + Math.round(switchBackInterval / 1000 / 60) + ' min');
+        this.logger.warn('Try to switch back to main proxy after ' +
+            Math.round(switchBackInterval / 1000 / 60) +
+            ' min');
         this.switchBackToMainProxyTimer = setTimeout(function () {
             _this.switchBackToMainProxyTimer = null;
             _this.logger.warn('switchBack initiated');
@@ -3189,10 +3299,12 @@ function getNextWsServer(force) {
         this.logger.warn('attempted to get next ws server but there are no available ws servers left');
         return;
     }
-    var candidates = force ? this.servers : this.servers.filter(function (_a) {
-        var isError = _a.isError;
-        return !isError;
-    });
+    var candidates = force
+        ? this.servers
+        : this.servers.filter(function (_a) {
+            var isError = _a.isError;
+            return !isError;
+        });
     return candidates[0];
 }
 function noAvailableServers() {
@@ -3205,7 +3317,10 @@ function isSipErrorCode(statusCode) {
     if (!statusCode) {
         return false;
     }
-    return (statusCode && this.sipErrorCodes && this.sipErrorCodes.length && this.sipErrorCodes.includes("".concat(statusCode)));
+    if (!this.sipErrorCodes) {
+        return false;
+    }
+    return this.sipErrorCodes.indexOf(statusCode.toString()) !== -1;
 }
 function onSipErrorCode() {
     return __awaiter(this, void 0, void 0, function () {
@@ -3241,7 +3356,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -3288,7 +3403,9 @@ function createWebPhoneUserAgent(configuration, sipInfo, options, id) {
             onInvite: function (invitation) {
                 userAgent.audioHelper.playIncoming(true);
                 invitation.delegate = {};
-                invitation.delegate.onSessionDescriptionHandler = function () { return (0, session_1.onSessionDescriptionHandlerCreated)(invitation); };
+                invitation.delegate.onSessionDescriptionHandler = function () {
+                    return (0, session_1.onSessionDescriptionHandlerCreated)(invitation);
+                };
                 (0, session_1.patchWebphoneSession)(invitation);
                 (0, session_1.patchIncomingWebphoneSession)(invitation);
                 invitation.logger.log('UA received incoming call invite');
@@ -3302,8 +3419,8 @@ function createWebPhoneUserAgent(configuration, sipInfo, options, id) {
                 }
                 userAgent.logger.log('UA received notify');
                 notification.accept();
-            }
-        }
+            },
+        },
     };
     var extendedConfiguration = Object.assign({}, extraConfiguration, configuration);
     var userAgent = new sip_js_1.UserAgent(extendedConfiguration);
@@ -3313,8 +3430,12 @@ function createWebPhoneUserAgent(configuration, sipInfo, options, id) {
     userAgent.once = eventEmitter.once.bind(eventEmitter);
     userAgent.addListener = eventEmitter.addListener.bind(eventEmitter);
     userAgent.removeListener = eventEmitter.removeListener.bind(eventEmitter);
-    userAgent.removeAllListeners = eventEmitter.removeAllListeners.bind(eventEmitter);
-    userAgent.defaultHeaders = ["P-rc-endpoint-id: ".concat(id), "Client-id: ".concat(options.clientId)];
+    userAgent.removeAllListeners =
+        eventEmitter.removeAllListeners.bind(eventEmitter);
+    userAgent.defaultHeaders = [
+        "P-rc-endpoint-id: ".concat(id),
+        "Client-id: ".concat(options.clientId),
+    ];
     userAgent.regId = options.regId;
     userAgent.instanceId = options.instanceId;
     userAgent.media = {};
@@ -3326,12 +3447,12 @@ function createWebPhoneUserAgent(configuration, sipInfo, options, id) {
         userAgent.media.local = options.media.local;
     }
     else {
-        userAgent.media = null;
+        userAgent.media = undefined;
     }
     userAgent.registerer = new sip_js_1.Registerer(userAgent, {
         regId: userAgent.regId,
         instanceId: userAgent.instanceId,
-        extraHeaders: userAgent.defaultHeaders
+        extraHeaders: userAgent.defaultHeaders,
     });
     userAgent.sipInfo = sipInfo;
     userAgent.modifiers = options.modifiers;
@@ -3340,7 +3461,8 @@ function createWebPhoneUserAgent(configuration, sipInfo, options, id) {
     userAgent.audioHelper = new audioHelper_1.AudioHelper(options.audioHelper);
     userAgent.onSession = options.onSession;
     userAgent._transport = (0, transport_1.createWebPhoneTransport)(userAgent.transport, options);
-    userAgent.onTransportDisconnect = onTransportDisconnect.bind(userAgent);
+    userAgent.onTransportDisconnect =
+        onTransportDisconnect.bind(userAgent);
     userAgent.emit = eventEmitter.emit.bind(eventEmitter);
     userAgent.register = register.bind(userAgent);
     userAgent.unregister = unregister.bind(userAgent);
@@ -3418,13 +3540,15 @@ function sendMessage(to, messageData) {
     to = to.startsWith('#') ? "sip:".concat(to.substring(1)) : "sip:".concat(to);
     var uri = sip_js_1.UserAgent.makeURI(to);
     uri.user = user;
-    var messager = new sip_js_1.Messager(this, uri, messageData, 'x-rc/agent', { extraHeaders: extraHeaders });
+    var messager = new sip_js_1.Messager(this, uri, messageData, 'x-rc/agent', {
+        extraHeaders: extraHeaders,
+    });
     return new Promise(function (resolve, reject) {
         messager.message({
             requestDelegate: {
                 onAccept: resolve,
-                onReject: reject
-            }
+                onReject: reject,
+            },
         });
     });
 }
@@ -3444,8 +3568,8 @@ function register() {
                                 }
                                 _this.emit(events_2.Events.UserAgent.RegistrationFailed, response);
                                 _this.logger.warn('UA Registration Failed');
-                            }
-                        }
+                            },
+                        },
                     })];
                 case 1:
                     _a.sent();
@@ -3471,16 +3595,27 @@ function invite(number, options) {
     if (options === void 0) { options = {}; }
     var inviterOptions = {};
     inviterOptions.extraHeaders = __spreadArray(__spreadArray(__spreadArray(__spreadArray([], (options.extraHeaders || []), true), this.defaultHeaders, true), [
-        "P-Asserted-Identity: sip: ".concat((options.fromNumber || this.sipInfo.username) + '@' + this.sipInfo.domain)
-    ], false), (options.homeCountryId ? ["P-rc-country-id: ".concat(options.homeCountryId)] : []), true);
+        "P-Asserted-Identity: sip: ".concat((options.fromNumber || this.sipInfo.username) +
+            '@' +
+            this.sipInfo.domain)
+    ], false), (options.homeCountryId
+        ? ["P-rc-country-id: ".concat(options.homeCountryId)]
+        : []), true);
     options.RTCConstraints =
-        options.RTCConstraints || Object.assign({}, this.constraints, { optional: [{ DtlsSrtpKeyAgreement: 'true' }] });
+        options.RTCConstraints ||
+            Object.assign({}, this.constraints, {
+                optional: [{ DtlsSrtpKeyAgreement: 'true' }],
+            });
     inviterOptions.sessionDescriptionHandlerModifiers = this.modifiers;
-    inviterOptions.sessionDescriptionHandlerOptions = { constraints: options.RTCConstraints };
+    inviterOptions.sessionDescriptionHandlerOptions = {
+        constraints: options.RTCConstraints,
+    };
     inviterOptions.earlyMedia = this.earlyMedia;
     inviterOptions.delegate = {
-        onSessionDescriptionHandler: function () { return (0, session_1.onSessionDescriptionHandlerCreated)(inviter); },
-        onNotify: function (notification) { return notification.accept(); }
+        onSessionDescriptionHandler: function () {
+            return (0, session_1.onSessionDescriptionHandlerCreated)(inviter);
+        },
+        onNotify: function (notification) { return notification.accept(); },
     };
     this.audioHelper.playOutgoing(true);
     this.logger.log("Invite to ".concat(number, " created with playOutgoing set to true"));
@@ -3494,8 +3629,8 @@ function invite(number, options) {
             },
             onProgress: function (inviteResponse) {
                 inviter.emit(events_2.Events.Session.Progress, inviteResponse.message);
-            }
-        }
+            },
+        },
     })
         .then(function () { return _this.emit(events_2.Events.UserAgent.InviteSent, inviter); })
         .catch(function (e) {
@@ -3516,14 +3651,18 @@ function switchFrom(activeCall, options) {
     if (options === void 0) { options = {}; }
     var replaceHeaders = [
         "Replaces: ".concat(activeCall.id, ";to-tag=").concat(activeCall.sipData.fromTag, ";from-tag=").concat(activeCall.sipData.toTag),
-        'RC-call-type: replace'
+        'RC-call-type: replace',
     ];
-    var _a = activeCall.direction === 'Outbound' ? [activeCall.to, activeCall.from] : [activeCall.from, activeCall.to], toNumber = _a[0], fromNumber = _a[1];
+    var _a = activeCall.direction === 'Outbound'
+        ? [activeCall.to, activeCall.from]
+        : [activeCall.from, activeCall.to], toNumber = _a[0], fromNumber = _a[1];
     options.extraHeaders = (options.extraHeaders || []).concat(replaceHeaders);
     options.fromNumber = options.fromNumber || fromNumber;
     var inviterOptions = {
         extraHeaders: options.extraHeaders,
-        sessionDescriptionHandlerOptions: { constraints: options.RTCConstraints || this.constraints }
+        sessionDescriptionHandlerOptions: {
+            constraints: options.RTCConstraints || this.constraints,
+        },
     };
     return this.invite(toNumber, inviterOptions);
 }
@@ -3549,8 +3688,10 @@ function patchUserAgentCore(userAgent) {
     userAgentCore.addListener = eventEmitter.addListener.bind(eventEmitter);
     userAgentCore.removeListener = eventEmitter.removeListener.bind(eventEmitter);
     userAgentCore.emit = eventEmitter.emit.bind(eventEmitter);
-    userAgentCore._receiveIncomingRequestFromTransport = userAgentCore.receiveIncomingRequestFromTransport.bind(userAgent.userAgentCore);
-    userAgentCore.receiveIncomingRequestFromTransport = receiveIncomingRequestFromTransport.bind(userAgent.userAgentCore);
+    userAgentCore._receiveIncomingRequestFromTransport =
+        userAgentCore.receiveIncomingRequestFromTransport.bind(userAgent.userAgentCore);
+    userAgentCore.receiveIncomingRequestFromTransport =
+        receiveIncomingRequestFromTransport.bind(userAgent.userAgentCore);
 }
 exports.patchUserAgentCore = patchUserAgentCore;
 function receiveIncomingRequestFromTransport(message) {
@@ -3565,7 +3706,9 @@ function receiveIncomingRequestFromTransport(message) {
         case core_1.C.INFO: {
             // For the Move2RCV request from server
             var content = getIncomingInfoContent(message);
-            if (((_a = content === null || content === void 0 ? void 0 : content.request) === null || _a === void 0 ? void 0 : _a.reqId) && ((_b = content === null || content === void 0 ? void 0 : content.request) === null || _b === void 0 ? void 0 : _b.command) === 'move' && ((_c = content === null || content === void 0 ? void 0 : content.request) === null || _c === void 0 ? void 0 : _c.target) === 'rcv') {
+            if (((_a = content === null || content === void 0 ? void 0 : content.request) === null || _a === void 0 ? void 0 : _a.reqId) &&
+                ((_b = content === null || content === void 0 ? void 0 : content.request) === null || _b === void 0 ? void 0 : _b.command) === 'move' &&
+                ((_c = content === null || content === void 0 ? void 0 : content.request) === null || _c === void 0 ? void 0 : _c.target) === 'rcv') {
                 this.replyStateless(message, { statusCode: 200 });
                 this.emit(events_2.Events.Session.MoveToRcv, content.request);
                 return;
@@ -3619,7 +3762,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
