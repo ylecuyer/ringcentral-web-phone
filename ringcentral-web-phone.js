@@ -3095,7 +3095,7 @@ function invite(number, options = {}) {
     inviterOptions.extraHeaders = [
         ...(options.extraHeaders || []),
         ...this.defaultHeaders,
-        `P-Asserted-Identity: sip: ${(options.fromNumber || this.sipInfo.username) +
+        `P-Asserted-Identity: sip:${(options.fromNumber || this.sipInfo.username) +
             '@' +
             this.sipInfo.domain}`,
         ...(options.homeCountryId
