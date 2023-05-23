@@ -20,7 +20,7 @@ return /******/ (() => { // webpackBootstrap
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "AudioHelper": () => (/* binding */ AudioHelper)
+/* harmony export */   AudioHelper: () => (/* binding */ AudioHelper)
 /* harmony export */ });
 class AudioHelper {
     /** Current volume */
@@ -113,13 +113,13 @@ class AudioHelper {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "defaultLogLevel": () => (/* binding */ defaultLogLevel),
-/* harmony export */   "defaultMediaConstraints": () => (/* binding */ defaultMediaConstraints),
-/* harmony export */   "defaultSipErrorCodes": () => (/* binding */ defaultSipErrorCodes),
-/* harmony export */   "defaultStunServers": () => (/* binding */ defaultStunServers),
-/* harmony export */   "messages": () => (/* binding */ messages),
-/* harmony export */   "responseTimeout": () => (/* binding */ responseTimeout),
-/* harmony export */   "uuidKey": () => (/* binding */ uuidKey)
+/* harmony export */   defaultLogLevel: () => (/* binding */ defaultLogLevel),
+/* harmony export */   defaultMediaConstraints: () => (/* binding */ defaultMediaConstraints),
+/* harmony export */   defaultSipErrorCodes: () => (/* binding */ defaultSipErrorCodes),
+/* harmony export */   defaultStunServers: () => (/* binding */ defaultStunServers),
+/* harmony export */   messages: () => (/* binding */ messages),
+/* harmony export */   responseTimeout: () => (/* binding */ responseTimeout),
+/* harmony export */   uuidKey: () => (/* binding */ uuidKey)
 /* harmony export */ });
 const messages = {
     park: { reqid: 1, command: 'callpark' },
@@ -156,7 +156,7 @@ const defaultLogLevel = 'debug';
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Events": () => (/* binding */ Events)
+/* harmony export */   Events: () => (/* binding */ Events)
 /* harmony export */ });
 /** @ignore */
 const Events = {
@@ -208,10 +208,10 @@ const Events = {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Browsers": () => (/* binding */ Browsers),
-/* harmony export */   "MediaStreams": () => (/* binding */ MediaStreams),
-/* harmony export */   "MediaStreamsImpl": () => (/* binding */ MediaStreamsImpl),
-/* harmony export */   "WebPhoneRTPReport": () => (/* binding */ WebPhoneRTPReport),
+/* harmony export */   Browsers: () => (/* binding */ Browsers),
+/* harmony export */   MediaStreams: () => (/* binding */ MediaStreams),
+/* harmony export */   MediaStreamsImpl: () => (/* binding */ MediaStreamsImpl),
+/* harmony export */   WebPhoneRTPReport: () => (/* binding */ WebPhoneRTPReport),
 /* harmony export */   "default": () => (/* binding */ MediaStreams)
 /* harmony export */ });
 /* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./events */ "./src/events.ts");
@@ -591,7 +591,7 @@ class MediaStreamsImpl {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "startQosStatsCollection": () => (/* binding */ startQosStatsCollection)
+/* harmony export */   startQosStatsCollection: () => (/* binding */ startQosStatsCollection)
 /* harmony export */ });
 /* harmony import */ var sip_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! sip.js */ "sip.js");
 /* harmony import */ var sip_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(sip_js__WEBPACK_IMPORTED_MODULE_0__);
@@ -854,7 +854,7 @@ function calculateMos(packetLoss) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "isNoAudio": () => (/* binding */ isNoAudio)
+/* harmony export */   isNoAudio: () => (/* binding */ isNoAudio)
 /* harmony export */ });
 function isNoAudio(report) {
     if (!report.inboundRtpReport) {
@@ -880,10 +880,10 @@ function isNoAudio(report) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "CommonSession": () => (/* binding */ CommonSession),
-/* harmony export */   "onSessionDescriptionHandlerCreated": () => (/* binding */ onSessionDescriptionHandlerCreated),
-/* harmony export */   "patchIncomingWebphoneSession": () => (/* binding */ patchIncomingWebphoneSession),
-/* harmony export */   "patchWebphoneSession": () => (/* binding */ patchWebphoneSession)
+/* harmony export */   CommonSession: () => (/* binding */ CommonSession),
+/* harmony export */   onSessionDescriptionHandlerCreated: () => (/* binding */ onSessionDescriptionHandlerCreated),
+/* harmony export */   patchIncomingWebphoneSession: () => (/* binding */ patchIncomingWebphoneSession),
+/* harmony export */   patchWebphoneSession: () => (/* binding */ patchWebphoneSession)
 /* harmony export */ });
 /* harmony import */ var events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! events */ "./node_modules/events/events.js");
 /* harmony import */ var events__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(events__WEBPACK_IMPORTED_MODULE_0__);
@@ -1688,10 +1688,10 @@ function setQosStats(stats) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "SessionDescriptionHandler": () => (/* binding */ SessionDescriptionHandler),
-/* harmony export */   "defaultMediaStreamFactory": () => (/* binding */ defaultMediaStreamFactory),
-/* harmony export */   "defaultPeerConnectionConfiguration": () => (/* binding */ defaultPeerConnectionConfiguration),
-/* harmony export */   "defaultSessionDescriptionFactory": () => (/* binding */ defaultSessionDescriptionFactory)
+/* harmony export */   SessionDescriptionHandler: () => (/* binding */ SessionDescriptionHandler),
+/* harmony export */   defaultMediaStreamFactory: () => (/* binding */ defaultMediaStreamFactory),
+/* harmony export */   defaultPeerConnectionConfiguration: () => (/* binding */ defaultPeerConnectionConfiguration),
+/* harmony export */   defaultSessionDescriptionFactory: () => (/* binding */ defaultSessionDescriptionFactory)
 /* harmony export */ });
 /**
  * A base class implementing a WebRTC session description handler for sip.js.
@@ -2615,7 +2615,7 @@ const defaultSessionDescriptionFactory = (session, options) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "createWebPhoneTransport": () => (/* binding */ createWebPhoneTransport)
+/* harmony export */   createWebPhoneTransport: () => (/* binding */ createWebPhoneTransport)
 /* harmony export */ });
 /* harmony import */ var events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! events */ "./node_modules/events/events.js");
 /* harmony import */ var events__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(events__WEBPACK_IMPORTED_MODULE_0__);
@@ -2845,7 +2845,7 @@ async function onSipErrorCode() {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "createWebPhoneUserAgent": () => (/* binding */ createWebPhoneUserAgent)
+/* harmony export */   createWebPhoneUserAgent: () => (/* binding */ createWebPhoneUserAgent)
 /* harmony export */ });
 /* harmony import */ var events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! events */ "./node_modules/events/events.js");
 /* harmony import */ var events__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(events__WEBPACK_IMPORTED_MODULE_0__);
@@ -3114,7 +3114,7 @@ function switchFrom(activeCall, options = {}) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "patchUserAgentCore": () => (/* binding */ patchUserAgentCore)
+/* harmony export */   patchUserAgentCore: () => (/* binding */ patchUserAgentCore)
 /* harmony export */ });
 /* harmony import */ var events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! events */ "./node_modules/events/events.js");
 /* harmony import */ var events__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(events__WEBPACK_IMPORTED_MODULE_0__);
@@ -3189,8 +3189,8 @@ function getIncomingInfoContent(message) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "extend": () => (/* binding */ extend),
-/* harmony export */   "uuid": () => (/* binding */ uuid)
+/* harmony export */   extend: () => (/* binding */ extend),
+/* harmony export */   uuid: () => (/* binding */ uuid)
 /* harmony export */ });
 const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
@@ -3727,7 +3727,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_sip_js__;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "SessionState": () => (/* binding */ SessionState)
+/* harmony export */   SessionState: () => (/* binding */ SessionState)
 /* harmony export */ });
 /**
  * {@link Session} state.
@@ -3787,7 +3787,7 @@ var SessionState;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Levels": () => (/* binding */ Levels)
+/* harmony export */   Levels: () => (/* binding */ Levels)
 /* harmony export */ });
 /**
  * Log levels.
@@ -3812,9 +3812,9 @@ var Levels;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "fromBodyLegacy": () => (/* binding */ fromBodyLegacy),
-/* harmony export */   "getBody": () => (/* binding */ getBody),
-/* harmony export */   "isBody": () => (/* binding */ isBody)
+/* harmony export */   fromBodyLegacy: () => (/* binding */ fromBodyLegacy),
+/* harmony export */   getBody: () => (/* binding */ getBody),
+/* harmony export */   isBody: () => (/* binding */ isBody)
 /* harmony export */ });
 /* harmony import */ var _incoming_request_message_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./incoming-request-message.js */ "./node_modules/sip.js/lib/core/messages/incoming-request-message.js");
 /* harmony import */ var _incoming_response_message_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./incoming-response-message.js */ "./node_modules/sip.js/lib/core/messages/incoming-response-message.js");
@@ -3949,7 +3949,7 @@ function getBody(message) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "IncomingMessage": () => (/* binding */ IncomingMessage)
+/* harmony export */   IncomingMessage: () => (/* binding */ IncomingMessage)
 /* harmony export */ });
 /* harmony import */ var _grammar_grammar_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../grammar/grammar.js */ "./node_modules/sip.js/lib/grammar/grammar.js");
 /* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils.js */ "./node_modules/sip.js/lib/core/messages/utils.js");
@@ -4094,7 +4094,7 @@ class IncomingMessage {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "IncomingRequestMessage": () => (/* binding */ IncomingRequestMessage)
+/* harmony export */   IncomingRequestMessage: () => (/* binding */ IncomingRequestMessage)
 /* harmony export */ });
 /* harmony import */ var _incoming_message_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./incoming-message.js */ "./node_modules/sip.js/lib/core/messages/incoming-message.js");
 
@@ -4119,7 +4119,7 @@ class IncomingRequestMessage extends _incoming_message_js__WEBPACK_IMPORTED_MODU
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "IncomingResponseMessage": () => (/* binding */ IncomingResponseMessage)
+/* harmony export */   IncomingResponseMessage: () => (/* binding */ IncomingResponseMessage)
 /* harmony export */ });
 /* harmony import */ var _incoming_message_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./incoming-message.js */ "./node_modules/sip.js/lib/core/messages/incoming-message.js");
 
@@ -4144,7 +4144,7 @@ class IncomingResponseMessage extends _incoming_message_js__WEBPACK_IMPORTED_MOD
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "C": () => (/* binding */ C)
+/* harmony export */   C: () => (/* binding */ C)
 /* harmony export */ });
 /* eslint-disable @typescript-eslint/no-namespace */
 /**
@@ -4180,7 +4180,7 @@ var C;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "OutgoingRequestMessage": () => (/* binding */ OutgoingRequestMessage)
+/* harmony export */   OutgoingRequestMessage: () => (/* binding */ OutgoingRequestMessage)
 /* harmony export */ });
 /* harmony import */ var _grammar_name_addr_header_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../grammar/name-addr-header.js */ "./node_modules/sip.js/lib/grammar/name-addr-header.js");
 /* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils.js */ "./node_modules/sip.js/lib/core/messages/utils.js");
@@ -4425,11 +4425,11 @@ class OutgoingRequestMessage {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "createRandomToken": () => (/* binding */ createRandomToken),
-/* harmony export */   "getReasonPhrase": () => (/* binding */ getReasonPhrase),
-/* harmony export */   "headerize": () => (/* binding */ headerize),
-/* harmony export */   "newTag": () => (/* binding */ newTag),
-/* harmony export */   "utf8Length": () => (/* binding */ utf8Length)
+/* harmony export */   createRandomToken: () => (/* binding */ createRandomToken),
+/* harmony export */   getReasonPhrase: () => (/* binding */ getReasonPhrase),
+/* harmony export */   headerize: () => (/* binding */ headerize),
+/* harmony export */   newTag: () => (/* binding */ newTag),
+/* harmony export */   utf8Length: () => (/* binding */ utf8Length)
 /* harmony export */ });
 /**
  * SIP Response Reasons
@@ -4581,7 +4581,7 @@ function utf8Length(str) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Grammar": () => (/* binding */ Grammar)
+/* harmony export */   Grammar: () => (/* binding */ Grammar)
 /* harmony export */ });
 /* harmony import */ var _pegjs_dist_grammar_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./pegjs/dist/grammar.js */ "./node_modules/sip.js/lib/grammar/pegjs/dist/grammar.js");
 /* eslint-disable @typescript-eslint/no-namespace */
@@ -4646,7 +4646,7 @@ var Grammar;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "NameAddrHeader": () => (/* binding */ NameAddrHeader)
+/* harmony export */   NameAddrHeader: () => (/* binding */ NameAddrHeader)
 /* harmony export */ });
 /* harmony import */ var _parameters_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./parameters.js */ "./node_modules/sip.js/lib/grammar/parameters.js");
 
@@ -4703,7 +4703,7 @@ class NameAddrHeader extends _parameters_js__WEBPACK_IMPORTED_MODULE_0__.Paramet
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Parameters": () => (/* binding */ Parameters)
+/* harmony export */   Parameters: () => (/* binding */ Parameters)
 /* harmony export */ });
 /**
  * @internal
@@ -4756,8 +4756,8 @@ class Parameters {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "SyntaxError": () => (/* binding */ SyntaxError),
-/* harmony export */   "parse": () => (/* binding */ parse)
+/* harmony export */   SyntaxError: () => (/* binding */ SyntaxError),
+/* harmony export */   parse: () => (/* binding */ parse)
 /* harmony export */ });
 /* harmony import */ var _name_addr_header_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../name-addr-header.js */ "./node_modules/sip.js/lib/grammar/name-addr-header.js");
 /* harmony import */ var _uri_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../uri.js */ "./node_modules/sip.js/lib/grammar/uri.js");
@@ -6293,8 +6293,8 @@ const parse = peg$parse;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "URI": () => (/* binding */ URI),
-/* harmony export */   "equivalentURI": () => (/* binding */ equivalentURI)
+/* harmony export */   URI: () => (/* binding */ URI),
+/* harmony export */   equivalentURI: () => (/* binding */ equivalentURI)
 /* harmony export */ });
 /* harmony import */ var _parameters_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./parameters.js */ "./node_modules/sip.js/lib/grammar/parameters.js");
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -6609,7 +6609,7 @@ function equivalentURI(a, b) {
   \**********************/
 /***/ ((module) => {
 
-module.exports = JSON.parse('{"license":"MIT","version":"1.0.0-beta2","scripts":{"test":"jest","test:coverage":"cat .coverage/lcov.info | coveralls -v","build":"yarn tsc && webpack --progress --color","serve":"webpack serve --progress --color","lint":"eslint --fix \'**/*.{ts,tsx,js}\' && prettier --write ."},"name":"ringcentral-web-phone","dependencies":{"sip.js":"0.21.2"},"devDependencies":{"@faker-js/faker":"7.6.0","@ringcentral/sdk":"4.7.4","@types/jest":"29.4.1","@types/jest-environment-puppeteer":"5.0.3","@types/node":"18.15.2","@typescript-eslint/eslint-plugin":"5.55.0","@typescript-eslint/parser":"5.55.0","buffer":"6.0.3","cache-loader":"4.1.0","copy-webpack-plugin":"11.0.0","coveralls":"3.1.1","crypto-browserify":"3.12.0","dotenv-override-true":"6.2.2","eslint":"8.36.0","eslint-config-alloy":"4.9.0","eslint-config-prettier":"8.7.0","eslint-plugin-jest":"27.2.1","eslint-plugin-prettier":"4.2.1","html-webpack-plugin":"5.5.0","istanbul-instrumenter-loader":"3.0.1","jest":"29.5.0","jest-puppeteer":"8.0.5","jquery":"3.6.4","prettier":"2.8.4","puppeteer":"19.7.4","querystring-es3":"0.2.1","stream-browserify":"3.0.0","ts-jest":"29.0.5","ts-loader":"9.4.2","ts-node":"10.9.1","ttpt":"0.2.2","typescript":"4.9.5","wait-for-async":"0.6.0","webpack":"5.76.1","webpack-cli":"5.0.1","webpack-dev-server":"4.11.1","yarn-upgrade-all":"0.7.2"},"preferGlobal":false,"main":"./lib/index.js","types":"./lib/index.d.ts","author":{"name":"RingCentral, Inc.","email":"devsupport@ringcentral.com"},"contributors":[{"name":"Kirill Konshin"},{"name":"Elias Sun"},{"name":"Vyshakh Babji"},{"name":"Yatin Gera"},{"name":"Tyler Liu"},{"name":"Embbnux Ji"}],"repository":{"type":"git","url":"git://github.com/ringcentral/ringcentral-web-phone.git"},"bugs":{"url":"https://github.com/ringcentral/ringcentral-web-phone/issues"},"homepage":"https://github.com/ringcentral/ringcentral-web-phone","engines":{"node":">=14"}}');
+module.exports = JSON.parse('{"name":"ringcentral-web-phone","version":"1.0.0-beta2","homepage":"https://github.com/ringcentral/ringcentral-web-phone","bugs":{"url":"https://github.com/ringcentral/ringcentral-web-phone/issues"},"repository":{"type":"git","url":"git://github.com/ringcentral/ringcentral-web-phone.git"},"license":"MIT","author":{"name":"RingCentral, Inc.","email":"devsupport@ringcentral.com"},"contributors":[{"name":"Kirill Konshin"},{"name":"Elias Sun"},{"name":"Vyshakh Babji"},{"name":"Yatin Gera"},{"name":"Tyler Liu"},{"name":"Embbnux Ji"}],"main":"./lib/index.js","types":"./lib/index.d.ts","scripts":{"build":"yarn tsc && webpack --progress --color","lint":"eslint --fix \'**/*.{ts,tsx,js,jsx}\' && prettier --write . && sort-package-json","serve":"webpack serve --progress --color","test":"jest","test:coverage":"cat .coverage/lcov.info | coveralls -v"},"dependencies":{"sip.js":"0.21.2"},"devDependencies":{"@faker-js/faker":"8.0.1","@ringcentral/sdk":"4.7.4","@types/jest":"29.5.1","@types/jest-environment-puppeteer":"5.0.3","@types/node":"20.2.3","@typescript-eslint/eslint-plugin":"5.59.7","@typescript-eslint/parser":"5.59.7","buffer":"6.0.3","cache-loader":"4.1.0","copy-webpack-plugin":"11.0.0","coveralls":"3.1.1","crypto-browserify":"3.12.0","dotenv-override-true":"6.2.2","eslint":"8.41.0","eslint-config-alloy":"5.0.0","eslint-config-prettier":"8.8.0","eslint-plugin-jest":"27.2.1","eslint-plugin-prettier":"4.2.1","html-webpack-plugin":"5.5.1","istanbul-instrumenter-loader":"3.0.1","jest":"29.5.0","jest-puppeteer":"8.0.6","jquery":"3.7.0","prettier":"2.8.8","puppeteer":"20.3.0","querystring-es3":"0.2.1","sort-package-json":"2.4.1","stream-browserify":"3.0.0","ts-jest":"29.1.0","ts-loader":"9.4.3","ts-node":"10.9.1","ttpt":"0.6.3","typescript":"5.0.4","wait-for-async":"0.6.1","webpack":"5.83.1","webpack-cli":"5.1.1","webpack-dev-server":"4.15.0","yarn-upgrade-all":"0.7.2"},"engines":{"node":">=16"},"preferGlobal":false}');
 
 /***/ })
 
@@ -6689,7 +6689,7 @@ var __webpack_exports__ = {};
   \**********************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ WebPhone)
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var sip_js_lib_core_log_levels__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! sip.js/lib/core/log/levels */ "./node_modules/sip.js/lib/core/log/levels.js");
 /* harmony import */ var sip_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! sip.js */ "sip.js");
@@ -6858,6 +6858,7 @@ class WebPhone {
         this.userAgent = (0,_userAgent__WEBPACK_IMPORTED_MODULE_1__.createWebPhoneUserAgent)(configuration, this.sipInfo, options, id);
     }
 }
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (WebPhone);
 
 })();
 
