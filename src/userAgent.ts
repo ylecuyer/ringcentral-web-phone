@@ -126,8 +126,8 @@ export function createWebPhoneUserAgent(
         userAgent.audioHelper!.playIncoming(true);
         invitation.delegate = {};
         invitation.delegate.onSessionDescriptionHandler = () => onSessionDescriptionHandlerCreated(invitation);
+        patchWebphoneSession(invitation);
         if (!!!options.disableRcPatch) {
-          patchWebphoneSession(invitation);
           patchIncomingWebphoneSession(invitation);
         }
         (invitation as any).logger.log('UA received incoming call invite');
@@ -205,9 +205,7 @@ export function createWebPhoneUserAgent(
   userAgent.sendMessage = sendMessage.bind(userAgent);
   userAgent.createRcMessage = createRcMessage.bind(userAgent);
   userAgent.switchFrom = switchFrom.bind(userAgent);
-  if (!!!options.disableRcPatch) {
-    patchUserAgentCore(userAgent);
-  }
+  patchUserAgentCore(userAgent);
   userAgent.start();
   userAgent.stateChange.addListener((newState) => {
     switch (newState) {
