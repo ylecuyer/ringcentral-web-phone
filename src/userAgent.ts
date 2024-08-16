@@ -131,7 +131,9 @@ export function createWebPhoneUserAgent(
           patchIncomingWebphoneSession(invitation);
         }
         (invitation as any).logger.log('UA received incoming call invite');
-        invitation.sendReceiveConfirm!();
+        if (typeof invitation.sendReceiveConfirm !== 'undefined') {
+          invitation.sendReceiveConfirm!();
+        }
         userAgent.emit!(Events.UserAgent.Invite, invitation);
       },
       onNotify: (notification): void => {
