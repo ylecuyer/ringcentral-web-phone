@@ -95,6 +95,10 @@ export interface WebPhoneOptions {
   connector?: LogConnector;
   /** Default headers to add to SIP messages */
   defaultHeaders?: string[];
+  /**
+   * Disable RC patches for SIP.js. default value `false`
+   */
+  disableRcPatch?: boolean;
   /** If `true` media will be sent prior to call being answered
    *
    * Set to `true` by default for firefox browser
